@@ -9,7 +9,7 @@ import (
 // HandleOriginal converts provided url to the shorten by generating random Id.
 // Returns 400 status code if user sent incorrect request's body, method or content-type.
 func (urls *Urls) HandleOriginal(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost && r.Header["Content-Type"][0] == "text/plain" {
+	if r.Method == http.MethodPost {
 		body, err := io.ReadAll(r.Body)
 
 		if err != nil || string(body) == "" {
