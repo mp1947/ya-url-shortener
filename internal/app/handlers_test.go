@@ -68,11 +68,13 @@ func TestHandleOriginal(t *testing.T) {
 			defer body.Close()
 
 			bodyData, err := io.ReadAll(body)
+			statusCode := w.Result().StatusCode
 
 			require.NoError(t, err)
 
-			if string(bodyData) != "" {
+			if statusCode == http.StatusCreated {
 				t.Logf("response body is: %v", string(bodyData))
+				assert.NotEmpty(t, bodyData)
 			}
 
 			assert.Equal(t, test.expectedRespCode, w.Result().StatusCode)
