@@ -17,13 +17,13 @@ func (urls *Urls) HandleOriginal(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		shortId := generateUrlId(randomIdStringLength)
+		shortID := generateURLID(randomIDStringLength)
 
-		urls.IdToUrl[shortId] = string(body)
+		urls.IDToURL[shortID] = string(body)
 
 		w.WriteHeader(http.StatusCreated)
 
-		w.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", shortId)))
+		w.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", shortID)))
 		return
 	}
 
@@ -31,8 +31,8 @@ func (urls *Urls) HandleOriginal(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleShort retrieves id from the GET request, looks for
-// corresponding url in urls.IdToUrl map and redirects to this url via 307 HTTP to the new Location.
-// If url wasn't found in urls.IdToUrl map or request is incorrect - returns 400 HTTP status code.
+// corresponding url in urls.IDToURL map and redirects to this url via 307 HTTP to the new Location.
+// If url wasn't found in urls.IDToURL map or request is incorrect - returns 400 HTTP status code.
 func (urls *Urls) HandleShort(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusBadRequest)
@@ -41,9 +41,9 @@ func (urls *Urls) HandleShort(w http.ResponseWriter, r *http.Request) {
 
 	id := r.PathValue("id")
 
-	originalUrl := urls.IdToUrl[id]
-	if originalUrl != "" {
-		w.Header().Set("Location", originalUrl)
+	originalURL := urls.IDToURL[id]
+	if originalURL != "" {
+		w.Header().Set("Location", originalURL)
 		w.WriteHeader(http.StatusTemporaryRedirect)
 		return
 	}

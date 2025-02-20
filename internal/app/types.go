@@ -2,5 +2,5 @@ package app
 
 // Urls represents a mapping between unique identifiers and their corresponding URLs.
 type Urls struct {
-	IdToUrl map[string]string
+	IDToURL map[string]string
 }
