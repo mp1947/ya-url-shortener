@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	urls := &app.Urls{IdToUrl: map[string]string{}}
+	urls := &app.Urls{IDToURL: map[string]string{}}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", urls.HandleOriginal)
