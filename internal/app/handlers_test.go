@@ -63,11 +63,13 @@ func TestHandleOriginal(t *testing.T) {
 
 			urls.HandleOriginal(w, r)
 
-			body := w.Result().Body
+			result := w.Result()
+
+			body := result.Body
+			defer body.Close()
 
 			bodyData, err := io.ReadAll(body)
-			statusCode := w.Result().StatusCode
-			defer body.Close()
+			statusCode := result.StatusCode
 
 			require.NoError(t, err)
 
@@ -128,10 +130,12 @@ func TestHandleShort(t *testing.T) {
 
 			urls.HandleShort(w, r)
 
-			respStatusCode := w.Result().StatusCode
-			location := w.Result().Header.Get("Location")
+			result := w.Result()
 
-			defer w.Result().Body.Close()
+			respStatusCode := result.StatusCode
+			location := result.Header.Get("Location")
+
+			defer result.Body.Close()
 
 			assert.Equal(t, test.expectedStatusCode, respStatusCode)
 
