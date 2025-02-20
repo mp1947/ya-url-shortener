@@ -65,10 +65,9 @@ func TestHandleOriginal(t *testing.T) {
 
 			body := w.Result().Body
 
-			defer body.Close()
-
 			bodyData, err := io.ReadAll(body)
 			statusCode := w.Result().StatusCode
+			defer body.Close()
 
 			require.NoError(t, err)
 
@@ -77,7 +76,7 @@ func TestHandleOriginal(t *testing.T) {
 				assert.NotEmpty(t, bodyData)
 			}
 
-			assert.Equal(t, test.expectedRespCode, w.Result().StatusCode)
+			assert.Equal(t, test.expectedRespCode, statusCode)
 		})
 	}
 }
@@ -130,11 +129,13 @@ func TestHandleShort(t *testing.T) {
 			urls.HandleShort(w, r)
 
 			respStatusCode := w.Result().StatusCode
+			location := w.Result().Header.Get("Location")
+
+			defer w.Result().Body.Close()
 
 			assert.Equal(t, test.expectedStatusCode, respStatusCode)
 
 			if respStatusCode == http.StatusTemporaryRedirect {
-				location := w.Result().Header.Get("Location")
 				assert.Equal(t, test.expectedLocation, location)
 			}
 		})
