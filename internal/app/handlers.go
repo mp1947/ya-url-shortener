@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 
@@ -24,15 +23,9 @@ func (urls *Urls) HandleOriginal(config config.Config) gin.HandlerFunc {
 			shortID := generateURLID(randomIDStringLength)
 
 			urls.IDToURL[shortID] = string(body)
-			shortURL := fmt.Sprintf(
-				"http://%s%s%s",
-				*config.ListenAddr,
-				*config.BasePath,
-				shortID,
-			)
+			shortURL := generateShortURL(c.Request, config, shortID)
 
 			c.Data(http.StatusCreated, contentType, []byte(shortURL))
-
 			return
 		}
 
@@ -55,7 +48,6 @@ func (urls *Urls) HandleShort(c *gin.Context) {
 	if originalURL != "" {
 		c.Header("Location", originalURL)
 		c.Data(http.StatusTemporaryRedirect, contentType, nil)
-		// w.WriteHeader(http.StatusTemporaryRedirect)
 		return
 	}
 	c.Data(http.StatusBadRequest, contentType, nil)
