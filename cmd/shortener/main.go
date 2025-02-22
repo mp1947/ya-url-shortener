@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/app"
@@ -25,6 +27,6 @@ func main() {
 	r := setupRouter(c, *urls)
 
 	if err := r.Run(*c.ListenAddr); err != nil {
-		panic(err)
+		fmt.Printf("error on server start: %v\n", err)
 	}
 }
