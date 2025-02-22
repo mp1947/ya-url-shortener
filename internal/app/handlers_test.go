@@ -67,7 +67,7 @@ func TestHandleOriginal(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
-			c.Request = httptest.NewRequest(test.request.httpMethod, *config.BasePath, test.request.requestBody)
+			c.Request = httptest.NewRequest(test.request.httpMethod, "/", test.request.requestBody)
 
 			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
 

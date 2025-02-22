@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -23,7 +24,7 @@ func (urls *Urls) HandleOriginal(config config.Config) gin.HandlerFunc {
 			shortID := generateURLID(randomIDStringLength)
 
 			urls.IDToURL[shortID] = string(body)
-			shortURL := generateShortURL(c.Request, config, shortID)
+			shortURL := fmt.Sprintf("%s/%s", *config.BaseResultUrl, shortID)
 
 			c.Data(http.StatusCreated, contentType, []byte(shortURL))
 			return

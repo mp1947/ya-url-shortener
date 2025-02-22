@@ -11,8 +11,8 @@ import (
 func setupRouter(c config.Config, urls app.Urls) *gin.Engine {
 	r := gin.Default()
 
-	r.Any(*c.BasePath, urls.HandleOriginal(c))
-	r.Any(*c.BasePath+"/:id", urls.HandleShort)
+	r.Any("/", urls.HandleOriginal(c))
+	r.Any("/:id", urls.HandleShort)
 
 	return r
 }
