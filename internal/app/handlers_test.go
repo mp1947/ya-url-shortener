@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -58,10 +59,12 @@ func TestHandleOriginal(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			r := httptest.NewRequest(test.request.httpMethod, "/", test.request.requestBody)
 			w := httptest.NewRecorder()
 
-			urls.HandleOriginal(w, r)
+			c, _ := gin.CreateTestContext(w)
+			c.Request = httptest.NewRequest(test.request.httpMethod, "/", test.request.requestBody)
+
+			urls.HandleOriginal(c)
 
 			result := w.Result()
 
@@ -123,12 +126,17 @@ func TestHandleShort(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			r := httptest.NewRequest(test.request.httpMethod, "/", nil)
-			r.SetPathValue("id", test.request.originalURLID)
-
 			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Request = httptest.NewRequest(test.request.httpMethod, "/", nil)
+			c.Params = []gin.Param{
+				{
+					Key:   "id",
+					Value: test.request.originalURLID,
+				},
+			}
 
-			urls.HandleShort(w, r)
+			urls.HandleShort(c)
 
 			result := w.Result()
 
