@@ -24,7 +24,7 @@ func (urls *Urls) HandleOriginal(config config.Config) gin.HandlerFunc {
 			shortID := generateURLID(randomIDStringLength)
 
 			urls.IDToURL[shortID] = string(body)
-			shortURL := fmt.Sprintf("%s/%s", *config.BaseResultUrl, shortID)
+			shortURL := fmt.Sprintf("%s/%s", *config.BaseResultURL, shortID)
 
 			c.Data(http.StatusCreated, contentType, []byte(shortURL))
 			return
