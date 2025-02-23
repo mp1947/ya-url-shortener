@@ -17,7 +17,7 @@ spec:
         - name: regcred
       containers:
         - name: shortener
-          image: us-west2-docker.pkg.dev/local-infra-420215/web-app-playground/ya-shortener:v1.0.0
+          image: us-west2-docker.pkg.dev/local-infra-420215/web-app-playground/ya-url-shortener:v1.0.0
           imagePullPolicy: Always
           args: ["-a", ":8080"]
           resources:
