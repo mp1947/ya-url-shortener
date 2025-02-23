@@ -1,0 +1,35 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shortener
+  namespace: ya-practicum
+spec:
+  selector:
+    matchLabels:
+      app: shortener
+  template:
+    metadata:
+      labels:
+        app: shortener
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: shortener
+          image: us-west2-docker.pkg.dev/local-infra-420215/web-app-playground/ya-shortener:v1.0.0
+          imagePullPolicy: Always
+          args: ["-a", ":8080"]
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
+          ports:
+            - containerPort: 8080
+          env:
+            - name: GIN_MODE
+              value: release
+            - name: BASE_URL
+              value: https://ya-shrt.local-infra.live

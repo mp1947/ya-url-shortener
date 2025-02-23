@@ -21,12 +21,12 @@ func main() {
 
 	urls := &app.Urls{IDToURL: map[string]string{}}
 
-	c := config.Config{}
-	c.ParseFlags()
+	cfg := config.Config{}
+	cfg.ParseFlags()
 
-	r := setupRouter(c, *urls)
+	r := setupRouter(cfg, *urls)
 
-	if err := r.Run(*c.ListenAddr); err != nil {
+	if err := r.Run(*cfg.ListenAddr); err != nil {
 		fmt.Printf("error on server start: %v\n", err)
 	}
 }

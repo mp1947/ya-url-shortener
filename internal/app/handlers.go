@@ -11,7 +11,7 @@ import (
 
 // HandleOriginal converts provided url to the shorten by generating random Id.
 // Returns 400 status code if user sent incorrect request's body, method or content-type.
-func (urls *Urls) HandleOriginal(config config.Config) gin.HandlerFunc {
+func (urls *Urls) HandleOriginal(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.Method == http.MethodPost {
 			body, err := io.ReadAll(c.Request.Body)
@@ -24,7 +24,7 @@ func (urls *Urls) HandleOriginal(config config.Config) gin.HandlerFunc {
 			shortID := generateURLID(randomIDStringLength)
 
 			urls.IDToURL[shortID] = string(body)
-			shortURL := fmt.Sprintf("%s/%s", *config.BaseResultURL, shortID)
+			shortURL := fmt.Sprintf("%s/%s", *cfg.BaseURL, shortID)
 
 			c.Data(http.StatusCreated, contentType, []byte(shortURL))
 			return
