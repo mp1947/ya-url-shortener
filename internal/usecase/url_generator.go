@@ -1,9 +1,10 @@
-package app
+package usecase
 
 import "math/rand/v2"
 
-// generateURLID generates random string with fixed length from charSet.
-func generateURLID(length int) string {
+const charSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func GenerateURLID(length int) string {
 	var result []byte
 
 	for i := 0; i < length; i++ {

@@ -1,4 +1,4 @@
-package app
+package handler
 
 import (
 	"io"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -57,7 +58,7 @@ func TestHandleOriginal(t *testing.T) {
 	}
 
 	// initialize urls map and default config
-	urls := &Urls{IDToURL: map[string]string{}}
+	urls := &Urls{ShortToOriginal: map[string]string{}}
 	config := config.Config{}
 	config.ParseFlags()
 	gin.SetMode(gin.TestMode)
@@ -71,7 +72,7 @@ func TestHandleOriginal(t *testing.T) {
 
 			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
 
-			handlerToTest := urls.HandleOriginal(config)
+			handlerToTest := urls.HandleOriginalURL(config)
 
 			handlerToTest(c)
 
@@ -97,9 +98,9 @@ func TestHandleOriginal(t *testing.T) {
 
 func TestHandleShort(t *testing.T) {
 
-	randomID := generateURLID(randomIDStringLength)
+	randomID := usecase.GenerateURLID(randomIDStringLength)
 
-	urls := &Urls{IDToURL: map[string]string{
+	urls := &Urls{ShortToOriginal: map[string]string{
 		randomID: testURL,
 	}}
 
@@ -146,7 +147,7 @@ func TestHandleShort(t *testing.T) {
 				},
 			}
 
-			urls.HandleShort(c)
+			urls.HandleShortURL(c)
 
 			result := w.Result()
 

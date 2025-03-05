@@ -1,4 +1,4 @@
-package app
+package handler
 
 import (
 	"fmt"
@@ -7,11 +7,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/usecase"
 )
 
-// HandleOriginal converts provided url to the shorten by generating random Id.
-// Returns 400 status code if user sent incorrect request's body, method or content-type.
-func (urls *Urls) HandleOriginal(cfg config.Config) gin.HandlerFunc {
+const (
+	randomIDStringLength = 8
+	contentType          = "text/plain; charset=utf-8"
+)
+
+type Urls struct {
+	ShortToOriginal map[string]string
+}
+
+func (urls *Urls) HandleOriginalURL(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.Method == http.MethodPost {
 			body, err := io.ReadAll(c.Request.Body)
@@ -21,9 +29,9 @@ func (urls *Urls) HandleOriginal(cfg config.Config) gin.HandlerFunc {
 				return
 			}
 
-			shortID := generateURLID(randomIDStringLength)
+			shortID := usecase.GenerateURLID(randomIDStringLength)
 
-			urls.IDToURL[shortID] = string(body)
+			urls.ShortToOriginal[shortID] = string(body)
 			shortURL := fmt.Sprintf("%s/%s", *cfg.BaseURL, shortID)
 
 			c.Data(http.StatusCreated, contentType, []byte(shortURL))
@@ -34,10 +42,7 @@ func (urls *Urls) HandleOriginal(cfg config.Config) gin.HandlerFunc {
 	}
 }
 
-// HandleShort retrieves id from the GET request, looks for
-// corresponding url in urls.IDToURL map and redirects to this url via 307 HTTP to the new Location.
-// If url wasn't found in urls.IDToURL map or request is incorrect - returns 400 HTTP status code.
-func (urls *Urls) HandleShort(c *gin.Context) {
+func (urls *Urls) HandleShortURL(c *gin.Context) {
 	if c.Request.Method != http.MethodGet {
 		c.Data(http.StatusBadRequest, contentType, nil)
 		return
@@ -45,7 +50,7 @@ func (urls *Urls) HandleShort(c *gin.Context) {
 
 	id := c.Param("id")
 
-	originalURL := urls.IDToURL[id]
+	originalURL := urls.ShortToOriginal[id]
 	if originalURL != "" {
 		c.Header("Location", originalURL)
 		c.Data(http.StatusTemporaryRedirect, contentType, nil)
