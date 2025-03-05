@@ -24,6 +24,7 @@ func ShortenURL(
 	return func(c *gin.Context) {
 		if c.Request.Method != http.MethodPost {
 			c.Data(http.StatusBadRequest, contentType, nil)
+			return
 		}
 
 		body, err := io.ReadAll(c.Request.Body)
