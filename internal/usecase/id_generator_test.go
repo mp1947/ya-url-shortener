@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenerateURLID(t *testing.T) {
+func TestGenerateRandomID(t *testing.T) {
 	tests := []struct {
 		testName             string
 		inputLength          int

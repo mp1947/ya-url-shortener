@@ -19,7 +19,7 @@ const (
 	testURL = "https://console.yandex.cloud/"
 )
 
-func TestHandleOriginal(t *testing.T) {
+func TestShortenURL(t *testing.T) {
 
 	type request struct {
 		httpMethod  string
@@ -97,7 +97,7 @@ func TestHandleOriginal(t *testing.T) {
 	}
 }
 
-func TestHandleShort(t *testing.T) {
+func TestGetOriginalURLByID(t *testing.T) {
 
 	randomID := usecase.GenerateRandomID(randomIDStringLength)
 

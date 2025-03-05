@@ -20,6 +20,7 @@ func ShortenURL(
 	cfg config.Config,
 	storage repository.Repository,
 ) gin.HandlerFunc {
+
 	return func(c *gin.Context) {
 		if c.Request.Method == http.MethodPost {
 			body, err := io.ReadAll(c.Request.Body)
