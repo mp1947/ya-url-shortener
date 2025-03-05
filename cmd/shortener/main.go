@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	storage := inmemory.InitStorage()
+	storage := inmemory.Init()
 
 	cfg := config.Config{}
 	cfg.ParseFlags()

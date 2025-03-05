@@ -14,15 +14,13 @@ run-debug: build
 run-release: build
 	@GIN_MODE=release ./bin/${APP_NAME} ${ARGS}
 
-check:
+check-code:
 	staticcheck ./...
 	go vet ./...
+	golangci-lint run --issues-exit-code 1 --print-issued-lines=true  ./...
 
 test-all:
 	go test -v ./...
-
-lint:
-	golangci-lint run --issues-exit-code 1 --print-issued-lines=true  ./...
 
 docker-test:
 	docker buildx build . \

@@ -60,7 +60,7 @@ func TestHandleOriginal(t *testing.T) {
 
 	// initialize urls map and default config
 	config := config.Config{}
-	memory := inmemory.InitStorage()
+	memory := inmemory.Init()
 	config.ParseFlags()
 	gin.SetMode(gin.TestMode)
 
@@ -101,7 +101,7 @@ func TestHandleShort(t *testing.T) {
 
 	randomID := usecase.GenerateURLID(randomIDStringLength)
 
-	memory := inmemory.InitStorage()
+	memory := inmemory.Init()
 
 	memory.Save(randomID, testURL)
 
