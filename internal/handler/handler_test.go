@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -58,8 +59,8 @@ func TestHandleOriginal(t *testing.T) {
 	}
 
 	// initialize urls map and default config
-	urls := &Urls{ShortToOriginal: map[string]string{}}
 	config := config.Config{}
+	memory := inmemory.InitStorage()
 	config.ParseFlags()
 	gin.SetMode(gin.TestMode)
 
@@ -72,7 +73,7 @@ func TestHandleOriginal(t *testing.T) {
 
 			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
 
-			handlerToTest := urls.HandleOriginalURL(config)
+			handlerToTest := ShortenURL(config, memory)
 
 			handlerToTest(c)
 
@@ -100,9 +101,9 @@ func TestHandleShort(t *testing.T) {
 
 	randomID := usecase.GenerateURLID(randomIDStringLength)
 
-	urls := &Urls{ShortToOriginal: map[string]string{
-		randomID: testURL,
-	}}
+	memory := inmemory.InitStorage()
+
+	memory.Save(randomID, testURL)
 
 	type request struct {
 		httpMethod    string
@@ -147,7 +148,9 @@ func TestHandleShort(t *testing.T) {
 				},
 			}
 
-			urls.HandleShortURL(c)
+			handlerToTest := HandleShortURL(memory)
+
+			handlerToTest(c)
 
 			result := w.Result()
 

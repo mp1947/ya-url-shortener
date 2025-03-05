@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
 )
 
@@ -15,11 +16,7 @@ const (
 	contentType          = "text/plain; charset=utf-8"
 )
 
-type Urls struct {
-	ShortToOriginal map[string]string
-}
-
-func (urls *Urls) HandleOriginalURL(cfg config.Config) gin.HandlerFunc {
+func ShortenURL(cfg config.Config, s *inmemory.Storage) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.Method == http.MethodPost {
 			body, err := io.ReadAll(c.Request.Body)
@@ -30,8 +27,8 @@ func (urls *Urls) HandleOriginalURL(cfg config.Config) gin.HandlerFunc {
 			}
 
 			shortID := usecase.GenerateURLID(randomIDStringLength)
+			s.Save(shortID, string(body))
 
-			urls.ShortToOriginal[shortID] = string(body)
 			shortURL := fmt.Sprintf("%s/%s", *cfg.BaseURL, shortID)
 
 			c.Data(http.StatusCreated, contentType, []byte(shortURL))
@@ -42,19 +39,21 @@ func (urls *Urls) HandleOriginalURL(cfg config.Config) gin.HandlerFunc {
 	}
 }
 
-func (urls *Urls) HandleShortURL(c *gin.Context) {
-	if c.Request.Method != http.MethodGet {
+func HandleShortURL(s *inmemory.Storage) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.Method != http.MethodGet {
+			c.Data(http.StatusBadRequest, contentType, nil)
+			return
+		}
+
+		id := c.Param("id")
+
+		originalURL := s.Get(id)
+		if originalURL != "" {
+			c.Header("Location", originalURL)
+			c.Data(http.StatusTemporaryRedirect, contentType, nil)
+			return
+		}
 		c.Data(http.StatusBadRequest, contentType, nil)
-		return
 	}
-
-	id := c.Param("id")
-
-	originalURL := urls.ShortToOriginal[id]
-	if originalURL != "" {
-		c.Header("Location", originalURL)
-		c.Data(http.StatusTemporaryRedirect, contentType, nil)
-		return
-	}
-	c.Data(http.StatusBadRequest, contentType, nil)
 }
