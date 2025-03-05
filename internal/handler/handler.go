@@ -33,7 +33,7 @@ func ShortenURL(
 			return
 		}
 
-		shortID := usecase.GenerateRandomID(randomIDStringLength)
+		shortID := usecase.GenerateRandomIDFromURL(string(body))
 		storage.Save(shortID, string(body))
 
 		shortURL := fmt.Sprintf("%s/%s", *cfg.BaseURL, shortID)

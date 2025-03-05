@@ -6,6 +6,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	testURL = "https://console.yandex.cloud/"
+)
+
 func TestGenerateRandomID(t *testing.T) {
 	tests := []struct {
 		testName             string
@@ -14,14 +18,13 @@ func TestGenerateRandomID(t *testing.T) {
 	}{
 		{
 			testName:             "test returned string length",
-			inputLength:          10,
-			expectedOutputLength: 10,
+			expectedOutputLength: resultStrLength,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			urlID := GenerateRandomID(test.inputLength)
+			urlID := GenerateRandomIDFromURL(testURL)
 			assert.Equal(t, test.expectedOutputLength, len(urlID))
 		})
 	}

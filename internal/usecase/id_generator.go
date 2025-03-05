@@ -1,15 +1,22 @@
 package usecase
 
-import "math/rand/v2"
+import (
+	"crypto/sha256"
+	"fmt"
+)
 
-const charSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const resultStrLength = 8
 
-func GenerateRandomID(length int) string {
-	var result []byte
+func GenerateRandomIDFromURL(url string) string {
+	hash := sha256.New()
 
-	for i := 0; i < length; i++ {
-		result = append(result, charSet[rand.IntN(len(charSet)-1)])
+	hash.Write([]byte(url))
+
+	result := hash.Sum(nil)
+
+	if len(result) < resultStrLength {
+		return fmt.Sprintf("%x", result)
 	}
 
-	return string(result)
+	return fmt.Sprintf("%x", result)[:resultStrLength]
 }
