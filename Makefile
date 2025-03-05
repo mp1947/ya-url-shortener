@@ -22,6 +22,5 @@ check-code:
 test-all:
 	go test -v ./...
 
-docker-test:
-	docker buildx build . \
-		--build-arg APP_PATH=${ENTRYPOINT}
+update-workflows:
+	git fetch template && git checkout template/main .github
