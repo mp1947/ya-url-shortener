@@ -22,24 +22,24 @@ func ShortenURL(
 ) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
-		if c.Request.Method == http.MethodPost {
-			body, err := io.ReadAll(c.Request.Body)
+		if c.Request.Method != http.MethodPost {
+			c.Data(http.StatusBadRequest, contentType, nil)
+		}
 
-			if err != nil || string(body) == "" {
-				c.Data(http.StatusBadRequest, contentType, nil)
-				return
-			}
+		body, err := io.ReadAll(c.Request.Body)
 
-			shortID := usecase.GenerateRandomID(randomIDStringLength)
-			storage.Save(shortID, string(body))
-
-			shortURL := fmt.Sprintf("%s/%s", *cfg.BaseURL, shortID)
-
-			c.Data(http.StatusCreated, contentType, []byte(shortURL))
+		if err != nil || string(body) == "" {
+			c.Data(http.StatusBadRequest, contentType, nil)
 			return
 		}
 
-		c.Data(http.StatusBadRequest, contentType, nil)
+		shortID := usecase.GenerateRandomID(randomIDStringLength)
+		storage.Save(shortID, string(body))
+
+		shortURL := fmt.Sprintf("%s/%s", *cfg.BaseURL, shortID)
+
+		c.Data(http.StatusCreated, contentType, []byte(shortURL))
+
 	}
 }
 
