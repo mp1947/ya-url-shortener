@@ -4,7 +4,7 @@ import "math/rand/v2"
 
 const charSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-func GenerateURLID(length int) string {
+func GenerateRandomID(length int) string {
 	var result []byte
 
 	for i := 0; i < length; i++ {

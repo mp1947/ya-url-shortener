@@ -60,7 +60,7 @@ func TestHandleOriginal(t *testing.T) {
 
 	// initialize urls map and default config
 	config := config.Config{}
-	memory := inmemory.Init()
+	storage := inmemory.Init()
 	config.ParseFlags()
 	gin.SetMode(gin.TestMode)
 
@@ -73,7 +73,7 @@ func TestHandleOriginal(t *testing.T) {
 
 			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
 
-			handlerToTest := ShortenURL(config, memory)
+			handlerToTest := ShortenURL(config, storage)
 
 			handlerToTest(c)
 
@@ -99,11 +99,11 @@ func TestHandleOriginal(t *testing.T) {
 
 func TestHandleShort(t *testing.T) {
 
-	randomID := usecase.GenerateURLID(randomIDStringLength)
+	randomID := usecase.GenerateRandomID(randomIDStringLength)
 
-	memory := inmemory.Init()
+	storage := inmemory.Init()
 
-	memory.Save(randomID, testURL)
+	storage.Save(randomID, testURL)
 
 	type request struct {
 		httpMethod    string
@@ -148,7 +148,7 @@ func TestHandleShort(t *testing.T) {
 				},
 			}
 
-			handlerToTest := HandleShortURL(memory)
+			handlerToTest := GetOriginalURLByID(storage)
 
 			handlerToTest(c)
 

@@ -29,7 +29,7 @@ func ShortenURL(
 				return
 			}
 
-			shortID := usecase.GenerateURLID(randomIDStringLength)
+			shortID := usecase.GenerateRandomID(randomIDStringLength)
 			storage.Save(shortID, string(body))
 
 			shortURL := fmt.Sprintf("%s/%s", *cfg.BaseURL, shortID)
@@ -42,7 +42,7 @@ func ShortenURL(
 	}
 }
 
-func HandleShortURL(storage repository.Repository) gin.HandlerFunc {
+func GetOriginalURLByID(storage repository.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.Method != http.MethodGet {
 			c.Data(http.StatusBadRequest, contentType, nil)

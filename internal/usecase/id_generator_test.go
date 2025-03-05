@@ -21,7 +21,7 @@ func TestGenerateURLID(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			urlID := GenerateURLID(test.inputLength)
+			urlID := GenerateRandomID(test.inputLength)
 			assert.Equal(t, test.expectedOutputLength, len(urlID))
 		})
 	}

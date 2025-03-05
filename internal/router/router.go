@@ -11,7 +11,7 @@ func CreateRouter(c config.Config, s repository.Repository) *gin.Engine {
 	r := gin.Default()
 
 	r.Any("/", handler.ShortenURL(c, s))
-	r.Any("/:id", handler.HandleShortURL(s))
+	r.Any("/:id", handler.GetOriginalURLByID(s))
 
 	return r
 }
