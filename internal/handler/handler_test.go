@@ -99,7 +99,7 @@ func TestShortenURL(t *testing.T) {
 
 func TestGetOriginalURLByID(t *testing.T) {
 
-	randomID := usecase.GenerateRandomIDFromURL(testURL)
+	randomID := usecase.GenerateIDFromURL(testURL)
 
 	storage := inmemory.Init()
 

@@ -5,7 +5,6 @@ import (
 	"os"
 )
 
-// Config is an application config
 type Config struct {
 	ListenAddr *string
 	BaseURL    *string

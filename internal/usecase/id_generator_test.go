@@ -10,7 +10,7 @@ const (
 	testURL = "https://console.yandex.cloud/"
 )
 
-func TestGenerateRandomID(t *testing.T) {
+func TestGenerateIDFromURL(t *testing.T) {
 	tests := []struct {
 		testName             string
 		inputLength          int
@@ -24,7 +24,7 @@ func TestGenerateRandomID(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			urlID := GenerateRandomIDFromURL(testURL)
+			urlID := GenerateIDFromURL(testURL)
 			assert.Equal(t, test.expectedOutputLength, len(urlID))
 		})
 	}

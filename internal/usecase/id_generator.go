@@ -7,7 +7,7 @@ import (
 
 const resultStrLength = 8
 
-func GenerateRandomIDFromURL(url string) string {
+func GenerateIDFromURL(url string) string {
 	hash := sha256.New()
 
 	hash.Write([]byte(url))

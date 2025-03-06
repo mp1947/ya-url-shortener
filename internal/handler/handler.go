@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	randomIDStringLength = 8
-	contentType          = "text/plain; charset=utf-8"
+	contentType = "text/plain; charset=utf-8"
 )
 
 func ShortenURL(
@@ -34,7 +33,7 @@ func ShortenURL(
 			return
 		}
 
-		shortID := usecase.GenerateRandomIDFromURL(string(body))
+		shortID := usecase.GenerateIDFromURL(string(body))
 		storage.Save(shortID, string(body))
 
 		shortURL := fmt.Sprintf("%s/%s", *cfg.BaseURL, shortID)
