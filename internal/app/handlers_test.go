@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -55,16 +56,24 @@ func TestHandleOriginal(t *testing.T) {
 		},
 	}
 
+	// initialize urls map and default config
 	urls := &Urls{IDToURL: map[string]string{}}
+	config := config.Config{}
+	config.ParseFlags()
+	gin.SetMode(gin.TestMode)
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
 			w := httptest.NewRecorder()
-
 			c, _ := gin.CreateTestContext(w)
+
 			c.Request = httptest.NewRequest(test.request.httpMethod, "/", test.request.requestBody)
 
-			urls.HandleOriginal(c)
+			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
+
+			handlerToTest := urls.HandleOriginal(config)
+
+			handlerToTest(c)
 
 			result := w.Result()
 
@@ -128,6 +137,7 @@ func TestHandleShort(t *testing.T) {
 		t.Run(test.testName, func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
+
 			c.Request = httptest.NewRequest(test.request.httpMethod, "/", nil)
 			c.Params = []gin.Param{
 				{

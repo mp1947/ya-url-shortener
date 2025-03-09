@@ -6,35 +6,32 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-)
-
-const (
-	contentType = "text/plain; charset=utf-8"
+	"github.com/mp1947/ya-url-shortener/config"
 )
 
 // HandleOriginal converts provided url to the shorten by generating random Id.
 // Returns 400 status code if user sent incorrect request's body, method or content-type.
-func (urls *Urls) HandleOriginal(c *gin.Context) {
-	if c.Request.Method == http.MethodPost {
-		body, err := io.ReadAll(c.Request.Body)
+func (urls *Urls) HandleOriginal(config config.Config) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.Method == http.MethodPost {
+			body, err := io.ReadAll(c.Request.Body)
 
-		if err != nil || string(body) == "" {
-			// w.WriteHeader(http.StatusBadRequest)
-			c.Data(http.StatusBadRequest, contentType, nil)
+			if err != nil || string(body) == "" {
+				c.Data(http.StatusBadRequest, contentType, nil)
+				return
+			}
+
+			shortID := generateURLID(randomIDStringLength)
+
+			urls.IDToURL[shortID] = string(body)
+			shortURL := fmt.Sprintf("%s/%s", *config.BaseResultURL, shortID)
+
+			c.Data(http.StatusCreated, contentType, []byte(shortURL))
 			return
 		}
 
-		shortID := generateURLID(randomIDStringLength)
-
-		urls.IDToURL[shortID] = string(body)
-		shortURL := fmt.Sprintf("http://localhost:8080/%s", shortID)
-
-		c.Data(http.StatusCreated, contentType, []byte(shortURL))
-
-		return
+		c.Data(http.StatusBadRequest, contentType, nil)
 	}
-
-	c.Data(http.StatusBadRequest, contentType, nil)
 }
 
 // HandleShort retrieves id from the GET request, looks for
@@ -47,13 +44,11 @@ func (urls *Urls) HandleShort(c *gin.Context) {
 	}
 
 	id := c.Param("id")
-	fmt.Println(id)
 
 	originalURL := urls.IDToURL[id]
 	if originalURL != "" {
 		c.Header("Location", originalURL)
 		c.Data(http.StatusTemporaryRedirect, contentType, nil)
-		// w.WriteHeader(http.StatusTemporaryRedirect)
 		return
 	}
 	c.Data(http.StatusBadRequest, contentType, nil)
