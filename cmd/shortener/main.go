@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/router"
