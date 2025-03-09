@@ -1,20 +1,19 @@
 package main
 
 import (
-	"net/http"
-
+	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/internal/app"
 )
 
 func main() {
 
 	urls := &app.Urls{IDToURL: map[string]string{}}
+	r := gin.Default()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", urls.HandleOriginal)
-	mux.HandleFunc("/{id}", urls.HandleShort)
+	r.Any("/", urls.HandleOriginal)
+	r.Any("/:id", urls.HandleShort)
 
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	if err := r.Run(":8080"); err != nil {
 		panic(err)
 	}
 }

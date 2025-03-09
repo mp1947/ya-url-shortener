@@ -4,48 +4,57 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+const (
+	contentType = "text/plain; charset=utf-8"
 )
 
 // HandleOriginal converts provided url to the shorten by generating random Id.
 // Returns 400 status code if user sent incorrect request's body, method or content-type.
-func (urls *Urls) HandleOriginal(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		body, err := io.ReadAll(r.Body)
+func (urls *Urls) HandleOriginal(c *gin.Context) {
+	if c.Request.Method == http.MethodPost {
+		body, err := io.ReadAll(c.Request.Body)
 
 		if err != nil || string(body) == "" {
-			w.WriteHeader(http.StatusBadRequest)
+			// w.WriteHeader(http.StatusBadRequest)
+			c.Data(http.StatusBadRequest, contentType, nil)
 			return
 		}
 
 		shortID := generateURLID(randomIDStringLength)
 
 		urls.IDToURL[shortID] = string(body)
+		shortURL := fmt.Sprintf("http://localhost:8080/%s", shortID)
 
-		w.WriteHeader(http.StatusCreated)
+		c.Data(http.StatusCreated, contentType, []byte(shortURL))
 
-		w.Write([]byte(fmt.Sprintf("http://localhost:8080/%s", shortID)))
 		return
 	}
 
-	w.WriteHeader(http.StatusBadRequest)
+	c.Data(http.StatusBadRequest, contentType, nil)
 }
 
 // HandleShort retrieves id from the GET request, looks for
 // corresponding url in urls.IDToURL map and redirects to this url via 307 HTTP to the new Location.
 // If url wasn't found in urls.IDToURL map or request is incorrect - returns 400 HTTP status code.
-func (urls *Urls) HandleShort(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusBadRequest)
+func (urls *Urls) HandleShort(c *gin.Context) {
+	if c.Request.Method != http.MethodGet {
+		c.Data(http.StatusBadRequest, contentType, nil)
 		return
 	}
 
-	id := r.PathValue("id")
+	id := c.Param("id")
+	fmt.Println(id)
 
 	originalURL := urls.IDToURL[id]
 	if originalURL != "" {
-		w.Header().Set("Location", originalURL)
-		w.WriteHeader(http.StatusTemporaryRedirect)
+		c.Header("Location", originalURL)
+		c.Data(http.StatusTemporaryRedirect, contentType, nil)
+		// w.WriteHeader(http.StatusTemporaryRedirect)
 		return
 	}
-	w.WriteHeader(http.StatusBadRequest)
+	c.Data(http.StatusBadRequest, contentType, nil)
 }

@@ -6,8 +6,9 @@ tidy:
 run: tidy
 	@go run ${ENTRYPOINT}
 
-sch:
+check:
 	staticcheck ./...
+	go vet ./...
 
 test-all:
 	go test -v ./...
