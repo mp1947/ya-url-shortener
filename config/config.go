@@ -1,13 +1,16 @@
 package config
 
 import (
+	"errors"
 	"flag"
+	"log"
 	"os"
+
+	"github.com/spf13/viper"
 )
 
 const (
-	defaultListenAddr = ":8080"
-	defaultBaseURL    = "http://localhost:8080"
+	defaultKeysAreNotFoundErr = "defaults.listen_addr or defaults.base_url is empty"
 )
 
 type Config struct {
@@ -16,6 +19,25 @@ type Config struct {
 }
 
 func (cfg *Config) ParseFlags() {
+	viper.SetConfigName("values")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("./config")
+	viper.AddConfigPath("../../config")
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("error reading config file, %s", err)
+	}
+
+	defaultListenAddr := viper.GetString("defaults.listen_addr")
+	defaultBaseURL := viper.GetString("defaults.base_url")
+
+	if defaultListenAddr == "" || defaultBaseURL == "" {
+		log.Fatalf(
+			"error reading settings from config: %s",
+			errors.New(defaultKeysAreNotFoundErr),
+		)
+	}
+
 	cfg.ListenAddr = flag.String("a", defaultListenAddr, "-a :8080")
 	cfg.BaseURL = flag.String("b", defaultBaseURL, "-b http://localhost:8080")
 	flag.Parse()
