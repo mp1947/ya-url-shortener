@@ -12,3 +12,4 @@ check:
 
 test-all:
 	go test -v ./...
+
