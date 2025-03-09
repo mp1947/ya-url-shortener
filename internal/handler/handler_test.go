@@ -1,4 +1,4 @@
-package app
+package handler
 
 import (
 	"io"
@@ -9,6 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
+	"github.com/mp1947/ya-url-shortener/internal/service"
+	"github.com/mp1947/ya-url-shortener/internal/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +20,7 @@ const (
 	testURL = "https://console.yandex.cloud/"
 )
 
-func TestHandleOriginal(t *testing.T) {
+func TestShortenURL(t *testing.T) {
 
 	type request struct {
 		httpMethod  string
@@ -56,10 +59,15 @@ func TestHandleOriginal(t *testing.T) {
 		},
 	}
 
-	// initialize urls map and default config
-	urls := &Urls{IDToURL: map[string]string{}}
 	config := config.Config{}
 	config.ParseFlags()
+
+	storage := &inmemory.Memory{}
+	storage.Init()
+
+	service := service.ShortenService{Storage: storage}
+
+	h := HandlerService{Service: service, Cfg: config}
 	gin.SetMode(gin.TestMode)
 
 	for _, test := range tests {
@@ -71,9 +79,7 @@ func TestHandleOriginal(t *testing.T) {
 
 			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
 
-			handlerToTest := urls.HandleOriginal(config)
-
-			handlerToTest(c)
+			h.ShortenURL(c)
 
 			result := w.Result()
 
@@ -95,18 +101,22 @@ func TestHandleOriginal(t *testing.T) {
 	}
 }
 
-func TestHandleShort(t *testing.T) {
+func TestGetOriginalURLByID(t *testing.T) {
 
-	randomID := generateURLID(randomIDStringLength)
+	randomID := usecase.GenerateIDFromURL(testURL)
 
-	urls := &Urls{IDToURL: map[string]string{
-		randomID: testURL,
-	}}
+	storage := &inmemory.Memory{}
+	storage.Init()
+	storage.Save(randomID, testURL)
+
+	service := service.ShortenService{Storage: storage}
+	h := HandlerService{Service: service}
 
 	type request struct {
 		httpMethod    string
 		originalURLID string
 	}
+
 	tests := []struct {
 		testName           string
 		request            request
@@ -146,7 +156,7 @@ func TestHandleShort(t *testing.T) {
 				},
 			}
 
-			urls.HandleShort(c)
+			h.GetOriginalURLByID(c)
 
 			result := w.Result()
 

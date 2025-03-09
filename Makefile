@@ -9,14 +9,18 @@ build: tidy
 	@go build -o ./bin/${APP_NAME} ${ENTRYPOINT}
 
 run-debug: build
-	@GIN_MODE=debug ./bin/${APP_NAME}
+	@GIN_MODE=debug ./bin/${APP_NAME} ${ARGS}
 
 run-release: build
-	@GIN_MODE=release ./bin/${APP_NAME}
+	@GIN_MODE=release ./bin/${APP_NAME} ${ARGS}
 
-check:
+check-code:
 	staticcheck ./...
 	go vet ./...
+	golangci-lint run --issues-exit-code 1 --print-issued-lines=true  ./...
 
 test-all:
 	go test -v ./...
+
+update-workflows:
+	git fetch template && git checkout template/main .github
