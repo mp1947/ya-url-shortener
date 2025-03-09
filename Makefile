@@ -5,3 +5,10 @@ tidy:
 
 run: tidy
 	@go run ${ENTRYPOINT}
+
+sch:
+	staticcheck ./...
+
+test-all:
+	go test -v ./...
+
