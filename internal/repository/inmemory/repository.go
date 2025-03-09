@@ -4,8 +4,8 @@ type Memory struct {
 	data map[string]string
 }
 
-func Init() *Memory {
-	return &Memory{data: make(map[string]string)}
+func (s *Memory) Init() {
+	s.data = make(map[string]string)
 }
 
 func (s *Memory) Save(shortURL, originalURL string) {
