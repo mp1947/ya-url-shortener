@@ -10,7 +10,7 @@ import (
 func CreateRouter(c config.Config, s service.Service) *gin.Engine {
 	r := gin.Default()
 
-	h := handler.HService{Service: s, Cfg: c}
+	h := handler.HandlerService{Service: s, Cfg: c}
 
 	r.Any("/", h.ShortenURL)
 	r.Any("/:id", h.GetOriginalURLByID)

@@ -67,7 +67,7 @@ func TestShortenURL(t *testing.T) {
 
 	service := service.ShortenService{Storage: storage}
 
-	h := HService{Service: service, Cfg: config}
+	h := HandlerService{Service: service, Cfg: config}
 	gin.SetMode(gin.TestMode)
 
 	for _, test := range tests {
@@ -110,7 +110,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 	storage.Save(randomID, testURL)
 
 	service := service.ShortenService{Storage: storage}
-	h := HService{Service: service}
+	h := HandlerService{Service: service}
 
 	type request struct {
 		httpMethod    string

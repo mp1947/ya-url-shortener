@@ -13,17 +13,12 @@ const (
 	contentType = "text/plain; charset=utf-8"
 )
 
-type HandlerService interface {
-	ShortenURL(c *gin.Context)
-	GetOriginalURLByID(c *gin.Context)
-}
-
-type HService struct {
+type HandlerService struct {
 	Service service.Service
 	Cfg     config.Config
 }
 
-func (s HService) ShortenURL(c *gin.Context) {
+func (s HandlerService) ShortenURL(c *gin.Context) {
 
 	if c.Request.Method != http.MethodPost {
 		c.Data(http.StatusBadRequest, contentType, nil)
@@ -43,7 +38,7 @@ func (s HService) ShortenURL(c *gin.Context) {
 
 }
 
-func (s HService) GetOriginalURLByID(c *gin.Context) {
+func (s HandlerService) GetOriginalURLByID(c *gin.Context) {
 	if c.Request.Method != http.MethodGet {
 		c.Data(http.StatusBadRequest, contentType, nil)
 		return
