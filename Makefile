@@ -8,10 +8,7 @@ tidy:
 build: tidy
 	@go build -o ./bin/${APP_NAME} ${ENTRYPOINT}
 
-run-debug: build
-	@GIN_MODE=debug ./bin/${APP_NAME} ${ARGS}
-
-run-release: build
+run: build
 	@GIN_MODE=release ./bin/${APP_NAME} ${ARGS}
 
 check-code:

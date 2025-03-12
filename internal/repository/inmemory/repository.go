@@ -1,11 +1,13 @@
 package inmemory
 
 type Memory struct {
-	data map[string]string
+	data        map[string]string
+	StorageType string
 }
 
 func (s *Memory) Init() {
 	s.data = make(map[string]string)
+	s.StorageType = "inmemory"
 }
 
 func (s *Memory) Save(shortURL, originalURL string) {
