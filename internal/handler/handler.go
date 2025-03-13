@@ -6,11 +6,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/dto"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 )
 
 const (
-	contentType = "text/plain; charset=utf-8"
+	contentType       = "text/plain; charset=utf-8"
+	requestBindingErr = "error parsing request params, invalid request"
 )
 
 type HandlerService struct {
@@ -53,4 +55,20 @@ func (s HandlerService) GetOriginalURLByID(c *gin.Context) {
 		return
 	}
 	c.Data(http.StatusBadRequest, contentType, nil)
+}
+
+func (s HandlerService) JSONShortenURL(c *gin.Context) {
+	var request dto.ShortenRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			dto.ShortenResponse{Result: requestBindingErr},
+		)
+		return
+	}
+
+	shortURL := s.Service.ShortenURL(s.Cfg, string(request.URL))
+
+	c.JSON(http.StatusCreated, dto.ShortenResponse{Result: shortURL})
+
 }

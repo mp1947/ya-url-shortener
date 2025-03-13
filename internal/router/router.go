@@ -16,6 +16,7 @@ func CreateRouter(
 ) *gin.Engine {
 
 	r := gin.New()
+
 	r.Use(gin.Recovery())
 	r.Use(middleware.LoggerMiddleware(l))
 
@@ -23,6 +24,9 @@ func CreateRouter(
 
 	r.Any("/", h.ShortenURL)
 	r.Any("/:id", h.GetOriginalURLByID)
+
+	api := r.Group("/api")
+	api.POST("/shorten", h.JSONShortenURL)
 
 	return r
 }

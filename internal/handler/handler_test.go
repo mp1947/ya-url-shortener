@@ -17,8 +17,16 @@ import (
 )
 
 const (
-	testURL = "https://console.yandex.cloud/"
+	testURL         = "https://console.yandex.cloud/"
+	testJSONRequest = `{"url": "https://console.yandex.cloud"}`
 )
+
+var listenAddr = ":8080"
+var baseURL = "http://localhost:8080"
+var cfg = config.Config{
+	ListenAddr: &listenAddr,
+	BaseURL:    &baseURL,
+}
 
 func TestShortenURL(t *testing.T) {
 
@@ -59,15 +67,7 @@ func TestShortenURL(t *testing.T) {
 		},
 	}
 
-	config := config.Config{}
-	config.ParseFlags()
-
-	storage := &inmemory.Memory{}
-	storage.Init()
-
-	service := service.ShortenService{Storage: storage}
-
-	h := HandlerService{Service: service, Cfg: config}
+	h := initTestHandlerService()
 	gin.SetMode(gin.TestMode)
 
 	for _, test := range tests {
@@ -172,4 +172,98 @@ func TestGetOriginalURLByID(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestJSONShortenURL(t *testing.T) {
+
+	shortenPath := "/api/shorten"
+
+	type request struct {
+		httpMethod  string
+		requestBody io.Reader
+		path        string
+	}
+
+	tests := []struct {
+		testName                string
+		request                 request
+		expectedRespCode        int
+		expectedRespContentType string
+	}{
+		{
+			testName: "test wrong http method",
+			request: request{
+				httpMethod:  http.MethodGet,
+				requestBody: nil,
+				path:        shortenPath,
+			},
+			expectedRespCode: http.StatusBadRequest,
+		},
+		{
+			testName: "test empty body",
+			request: request{
+				httpMethod:  http.MethodPost,
+				requestBody: nil,
+				path:        shortenPath,
+			},
+			expectedRespCode: http.StatusBadRequest,
+		},
+		{
+			testName: "test correct request",
+			request: request{
+				httpMethod:  http.MethodPost,
+				requestBody: strings.NewReader(testJSONRequest),
+				path:        shortenPath,
+			},
+			expectedRespCode: http.StatusCreated,
+		},
+	}
+
+	h := initTestHandlerService()
+
+	gin.SetMode(gin.TestMode)
+
+	for _, tc := range tests {
+		t.Run(tc.testName, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+
+			c.Request = httptest.NewRequest(
+				tc.request.httpMethod,
+				tc.request.path,
+				tc.request.requestBody,
+			)
+
+			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
+
+			h.JSONShortenURL(c)
+
+			result := w.Result()
+
+			body := result.Body
+			defer body.Close()
+
+			bodyData, err := io.ReadAll(body)
+			statusCode := result.StatusCode
+
+			require.NoError(t, err)
+
+			if statusCode == http.StatusCreated {
+				t.Logf("json response body is: %v", string(bodyData))
+				assert.NotEmpty(t, bodyData)
+			}
+
+			assert.Equal(t, tc.expectedRespCode, statusCode)
+		})
+	}
+}
+
+func initTestHandlerService() HandlerService {
+
+	storage := &inmemory.Memory{}
+	storage.Init()
+
+	service := service.ShortenService{Storage: storage}
+
+	return HandlerService{Service: service, Cfg: cfg}
 }
