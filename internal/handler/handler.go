@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 
@@ -12,7 +13,8 @@ import (
 
 const (
 	contentType       = "text/plain; charset=utf-8"
-	requestBindingErr = "error parsing request params, invalid request"
+	requestBindingErr = "invalid request: error parsing request params"
+	requestBodyGetErr = "error getting request body"
 )
 
 type HandlerService struct {
@@ -59,7 +61,18 @@ func (s HandlerService) GetOriginalURLByID(c *gin.Context) {
 
 func (s HandlerService) JSONShortenURL(c *gin.Context) {
 	var request dto.ShortenRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	rawRequest, err := c.GetRawData()
+
+	if err != nil {
+		c.JSON(
+			http.StatusBadRequest,
+			dto.ShortenResponse{Result: requestBodyGetErr},
+		)
+		return
+	}
+
+	if err := json.Unmarshal(rawRequest, &request); err != nil {
+
 		c.JSON(
 			http.StatusBadRequest,
 			dto.ShortenResponse{Result: requestBindingErr},
