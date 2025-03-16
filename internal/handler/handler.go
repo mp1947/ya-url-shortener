@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -80,8 +79,6 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 		)
 		return
 	}
-
-	fmt.Println(string(rawRequest))
 
 	shortURL := s.Service.ShortenURL(s.Cfg, string(request.URL))
 
