@@ -37,13 +37,6 @@ func LoggerMiddleware(log *zap.Logger) gin.HandlerFunc {
 func GzipMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		contentType := c.ContentType()
-
-		if contentType != "application/json" && contentType != "text/html" {
-			c.Next()
-			return
-		}
-
 		contentEncoding := c.GetHeader("Content-Encoding")
 		isRequestEncoded := strings.Contains(contentEncoding, "gzip")
 
