@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"compress/gzip"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -55,7 +56,7 @@ func GzipMiddleware() gin.HandlerFunc {
 				return
 			}
 			defer reader.Close()
-			c.Request.Body = reader
+			c.Request.Body = io.NopCloser(reader)
 		}
 
 		acceptEncoding := c.GetHeader("Accept-Encoding")
