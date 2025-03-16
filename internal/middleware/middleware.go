@@ -33,7 +33,7 @@ func LoggerMiddleware(log *zap.Logger) gin.HandlerFunc {
 	}
 }
 
-func GzipMiddleware(log *zap.Logger) gin.HandlerFunc {
+func GzipMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		contentType := c.ContentType()
