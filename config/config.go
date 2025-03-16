@@ -10,12 +10,13 @@ import (
 )
 
 const (
-	defaultKeysAreNotFoundErr = "defaults.listen_addr or defaults.base_url is empty"
+	defaultKeysAreNotFoundErr = "error getting defaults from config"
 )
 
 type Config struct {
-	ListenAddr *string
-	BaseURL    *string
+	ListenAddr      *string
+	BaseURL         *string
+	FileStoragePath *string
 }
 
 func (cfg *Config) ParseFlags() {
@@ -30,8 +31,9 @@ func (cfg *Config) ParseFlags() {
 
 	defaultListenAddr := viper.GetString("defaults.listen_addr")
 	defaultBaseURL := viper.GetString("defaults.base_url")
+	defaultFileStoragePath := viper.GetString("defaults.file_storage_path")
 
-	if defaultListenAddr == "" || defaultBaseURL == "" {
+	if defaultListenAddr == "" || defaultBaseURL == "" || defaultFileStoragePath == "" {
 		log.Fatalf(
 			"error reading settings from config: %s",
 			errors.New(defaultKeysAreNotFoundErr),
@@ -40,6 +42,7 @@ func (cfg *Config) ParseFlags() {
 
 	cfg.ListenAddr = flag.String("a", defaultListenAddr, "-a :8080")
 	cfg.BaseURL = flag.String("b", defaultBaseURL, "-b http://localhost:8080")
+	cfg.FileStoragePath = flag.String("f", defaultFileStoragePath, "-f ./storage/storage.txt")
 	flag.Parse()
 
 	if addr := os.Getenv("SERVER_ADDRESS"); addr != "" {
@@ -48,5 +51,9 @@ func (cfg *Config) ParseFlags() {
 
 	if baseURL := os.Getenv("BASE_URL"); baseURL != "" {
 		cfg.BaseURL = &baseURL
+	}
+
+	if fileStoragePath := os.Getenv("FILE_STORAGE_PATH"); fileStoragePath != "" {
+		cfg.FileStoragePath = &fileStoragePath
 	}
 }

@@ -110,7 +110,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 	storage.Save(randomID, testURL)
 
 	service := service.ShortenService{Storage: storage}
-	h := HandlerService{Service: service}
+	h := HandlerService{Service: &service}
 
 	type request struct {
 		httpMethod    string
@@ -265,5 +265,5 @@ func initTestHandlerService() HandlerService {
 
 	service := service.ShortenService{Storage: storage}
 
-	return HandlerService{Service: service, Cfg: cfg}
+	return HandlerService{Service: &service, Cfg: cfg}
 }

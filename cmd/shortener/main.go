@@ -23,20 +23,6 @@ func main() {
 
 	logger.Info("initializing web server")
 
-	logger.Info("creating and initializing storage")
-
-	storage := &inmemory.Memory{}
-	storage.Init()
-
-	logger.Info(
-		"storage has been initialized",
-		zap.String("type", storage.StorageType),
-	)
-
-	logger.Info("creating shortener service")
-
-	service := service.ShortenService{Storage: storage}
-
 	logger.Info("parsing configuration parameters")
 	cfg := config.Config{}
 	cfg.ParseFlags()
@@ -47,7 +33,41 @@ func main() {
 		zap.String("base_url", *cfg.BaseURL),
 	)
 
-	r := router.CreateRouter(cfg, service, logger)
+	logger.Info("creating and initializing storage")
+
+	storage := &inmemory.Memory{}
+	storage.Init()
+
+	logger.Info(
+		"storage has been initialized",
+		zap.String("type", storage.StorageType),
+	)
+
+	ep, err := service.NewEventProcessor(cfg)
+
+	if err != nil {
+		logger.Fatal("failed creating new event processor", zap.Error(err))
+	}
+
+	logger.Info(
+		"restoring records from file storage",
+		zap.String("file_storage_path", *cfg.FileStoragePath),
+	)
+	numRecordsRestored, err := ep.RestoreFromFile(cfg)
+
+	if err != nil {
+		logger.Fatal("error loading data from file", zap.Error(err))
+	}
+
+	logger.Info("records restored", zap.Int("count", numRecordsRestored))
+
+	logger.Info("creating shortener service")
+	service := service.ShortenService{
+		Storage: storage,
+		EP:      *ep,
+	}
+
+	r := router.CreateRouter(cfg, &service, logger)
 
 	logger.Info(
 		"router has been created. web server is ready to start",
