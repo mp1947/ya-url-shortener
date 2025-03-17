@@ -9,7 +9,7 @@ build: tidy
 	@go build -o ./bin/${APP_NAME} ${ENTRYPOINT}
 
 run: build
-	@mkdir -p ./data && GIN_MODE=release ./bin/${APP_NAME} ${ARGS}
+	@GIN_MODE=release ./bin/${APP_NAME} ${ARGS}
 
 check-code:
 	staticcheck ./...
