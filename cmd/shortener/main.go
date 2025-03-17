@@ -53,7 +53,7 @@ func main() {
 		"restoring records from file storage",
 		zap.String("file_storage_path", *cfg.FileStoragePath),
 	)
-	numRecordsRestored, err := ep.RestoreFromFile(cfg)
+	numRecordsRestored, err := ep.RestoreFromFile(cfg, storage)
 
 	if err != nil {
 		logger.Fatal("error loading data from file", zap.Error(err))
@@ -61,7 +61,6 @@ func main() {
 
 	logger.Info("records restored", zap.Int("count", numRecordsRestored))
 
-	logger.Info("creating shortener service")
 	service := service.ShortenService{
 		Storage: storage,
 		EP:      *ep,

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/repository"
 )
 
 type Event struct {
@@ -49,7 +50,7 @@ func (ep *EventProcessor) setUUID(uuid int) {
 	ep.currentUUID = uuid
 }
 
-func (ep *EventProcessor) RestoreFromFile(cfg config.Config) (int, error) {
+func (ep *EventProcessor) RestoreFromFile(cfg config.Config, r repository.Repository) (int, error) {
 	file, err := os.OpenFile(*cfg.FileStoragePath, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return 0, err
@@ -63,6 +64,9 @@ func (ep *EventProcessor) RestoreFromFile(cfg config.Config) (int, error) {
 
 		if err := json.Unmarshal([]byte(line), &event); err != nil {
 			return 0, err
+		}
+		if r.GetType() == "inmemory" {
+			r.Save(event.ShortURL, event.OriginalURL)
 		}
 
 		currentUUID += 1

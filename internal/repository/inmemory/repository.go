@@ -22,3 +22,7 @@ func (s *Memory) Save(shortURL, originalURL string) bool {
 func (s *Memory) Get(shortURL string) string {
 	return s.data[shortURL]
 }
+
+func (s *Memory) GetType() string {
+	return s.StorageType
+}
