@@ -23,9 +23,11 @@ const (
 
 var listenAddr = ":8080"
 var baseURL = "http://localhost:8080"
+var fileStoragePath = "./test.out"
 var cfg = config.Config{
-	ListenAddr: &listenAddr,
-	BaseURL:    &baseURL,
+	ListenAddr:      &listenAddr,
+	BaseURL:         &baseURL,
+	FileStoragePath: &fileStoragePath,
 }
 
 func TestShortenURL(t *testing.T) {
@@ -263,7 +265,13 @@ func initTestHandlerService() HandlerService {
 	storage := &inmemory.Memory{}
 	storage.Init()
 
-	service := service.ShortenService{Storage: storage}
+	ep, err := service.NewEventProcessor(cfg)
+
+	if err != nil {
+		panic(err)
+	}
+
+	service := service.ShortenService{Storage: storage, EP: *ep}
 
 	return HandlerService{Service: &service, Cfg: cfg}
 }
