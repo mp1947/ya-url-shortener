@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/eventlog"
 	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
 )
@@ -16,7 +17,7 @@ type Service interface {
 
 type ShortenService struct {
 	Storage repository.Repository
-	EP      EventProcessor
+	EP      eventlog.EventProcessor
 }
 
 func (s *ShortenService) ShortenURL(cfg config.Config, url string) string {
@@ -24,13 +25,13 @@ func (s *ShortenService) ShortenURL(cfg config.Config, url string) string {
 	isSaved := s.Storage.Save(ShortURLID, url)
 
 	if isSaved {
-		s.EP.incrementUUID()
-		event := Event{
-			UUID:        strconv.Itoa(s.EP.currentUUID),
+		s.EP.IncrementUUID()
+		event := eventlog.Event{
+			UUID:        strconv.Itoa(s.EP.CurrentUUID),
 			ShortURL:    ShortURLID,
 			OriginalURL: url,
 		}
-		s.EP.writeEvent(&event)
+		s.EP.WriteEvent(&event)
 	}
 
 	return fmt.Sprintf("%s/%s", *cfg.BaseURL, ShortURLID)

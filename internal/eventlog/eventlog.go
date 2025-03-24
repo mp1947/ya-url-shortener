@@ -1,4 +1,4 @@
-package service
+package eventlog
 
 import (
 	"bufio"
@@ -18,7 +18,7 @@ type Event struct {
 type EventProcessor struct {
 	File        *os.File
 	Encoder     *json.Encoder
-	currentUUID int
+	CurrentUUID int
 }
 
 func NewEventProcessor(cfg config.Config) (*EventProcessor, error) {
@@ -34,27 +34,31 @@ func NewEventProcessor(cfg config.Config) (*EventProcessor, error) {
 	return &EventProcessor{
 		File:        file,
 		Encoder:     json.NewEncoder(file),
-		currentUUID: 0,
+		CurrentUUID: 0,
 	}, nil
 }
 
-func (ep *EventProcessor) writeEvent(e *Event) error {
+func (ep *EventProcessor) WriteEvent(e *Event) error {
 	return ep.Encoder.Encode(&e)
 }
 
-func (ep *EventProcessor) incrementUUID() {
-	ep.currentUUID++
+func (ep *EventProcessor) IncrementUUID() {
+	ep.CurrentUUID++
 }
 
 func (ep *EventProcessor) setUUID(uuid int) {
-	ep.currentUUID = uuid
+	ep.CurrentUUID = uuid
 }
 
-func (ep *EventProcessor) RestoreFromFile(cfg config.Config, r repository.Repository) (int, error) {
+func (ep *EventProcessor) RestoreFromFile(
+	cfg config.Config,
+	r repository.Repository,
+) (int, error) {
 	file, err := os.OpenFile(*cfg.FileStoragePath, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return 0, err
 	}
+	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	currentUUID := 0
 

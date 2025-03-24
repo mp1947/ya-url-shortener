@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/eventlog"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
@@ -265,7 +266,7 @@ func initTestHandlerService() HandlerService {
 	storage := &inmemory.Memory{}
 	storage.Init()
 
-	ep, err := service.NewEventProcessor(cfg)
+	ep, err := eventlog.NewEventProcessor(cfg)
 
 	if err != nil {
 		panic(err)

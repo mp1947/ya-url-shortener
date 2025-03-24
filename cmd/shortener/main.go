@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/eventlog"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/router"
@@ -25,7 +26,7 @@ func main() {
 
 	logger.Info("parsing configuration parameters")
 	cfg := config.Config{}
-	cfg.ParseFlags()
+	cfg.InitConfig()
 
 	logger.Info(
 		"config has been initialized",
@@ -43,7 +44,7 @@ func main() {
 		zap.String("type", storage.StorageType),
 	)
 
-	ep, err := service.NewEventProcessor(cfg)
+	ep, err := eventlog.NewEventProcessor(cfg)
 
 	if err != nil {
 		logger.Fatal("failed creating new event processor", zap.Error(err))

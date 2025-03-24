@@ -19,7 +19,7 @@ type Config struct {
 	FileStoragePath *string
 }
 
-func (cfg *Config) ParseFlags() {
+func (cfg *Config) InitConfig() {
 	viper.SetConfigName("values")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config")
