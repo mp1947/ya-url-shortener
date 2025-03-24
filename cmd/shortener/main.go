@@ -54,7 +54,7 @@ func main() {
 		"restoring records from file storage",
 		zap.String("file_storage_path", *cfg.FileStoragePath),
 	)
-	numRecordsRestored, err := ep.RestoreFromFile(cfg, storage)
+	numRecordsRestored, err := ep.RestoreFromFile(cfg, storage, logger)
 
 	if err != nil {
 		logger.Fatal("error loading data from file", zap.Error(err))
