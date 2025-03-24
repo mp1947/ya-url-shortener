@@ -52,8 +52,8 @@ func GzipMiddleware() gin.HandlerFunc {
 			c.Request.Body = io.NopCloser(reader)
 		}
 
-		acceptEncoding := c.GetHeader("Accept-Encoding")
-		supportsGzip := strings.Contains(acceptEncoding, "gzip")
+		supportsGzip := shouldUseGzip(c.GetHeader("Accept-Encoding"))
+
 		if !supportsGzip {
 			c.Next()
 			return
@@ -68,4 +68,29 @@ func GzipMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func shouldUseGzip(acceptEncoding string) bool {
+	if acceptEncoding == "" {
+		return false
+	}
+
+	encodings := strings.Split(acceptEncoding, ",")
+	for _, enc := range encodings {
+		enc = strings.ToLower(strings.TrimSpace(enc))
+		if strings.Contains(enc, "gzip") {
+			if strings.Contains(enc, "q=") {
+				parts := strings.Split(enc, "q=")
+				if len(parts) > 1 {
+					qValue := strings.TrimSpace(parts[1])
+					if qValue == "0.0" || qValue == "0" {
+						return false
+					}
+				}
+			}
+			return true
+		}
+
+	}
+	return false
 }
