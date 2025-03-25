@@ -2,14 +2,14 @@ package middleware
 
 import (
 	"io"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type gzipWriter struct {
 	gin.ResponseWriter
-	writer io.Writer
+	writer     io.Writer
+	statusCode int
 }
 
 func (gzw *gzipWriter) Write(p []byte) (int, error) {
@@ -17,8 +17,6 @@ func (gzw *gzipWriter) Write(p []byte) (int, error) {
 }
 
 func (gzw *gzipWriter) WriteHeader(statusCode int) {
-	if statusCode < http.StatusBadRequest {
-		gzw.ResponseWriter.Header().Set("Content-Encoding", "gzip")
-	}
-	gzw.ResponseWriter.WriteHeader(statusCode)
+	gzw.statusCode = statusCode
+	gzw.ResponseWriter.WriteHeader(gzw.statusCode)
 }

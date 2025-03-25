@@ -59,12 +59,20 @@ func GzipMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		gzw, _ := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
+		gzw, err := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
+
+		if err != nil {
+			io.WriteString(c.Writer, err.Error())
+			return
+		}
+
 		defer gzw.Close()
 		c.Writer = &gzipWriter{
 			ResponseWriter: c.Writer,
 			writer:         gzw,
 		}
+		c.Writer.Header().Set("Content-Encoding", "gzip")
+		gzw.Flush()
 
 		c.Next()
 	}
