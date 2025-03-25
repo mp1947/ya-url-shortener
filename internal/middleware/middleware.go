@@ -66,13 +66,16 @@ func GzipMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		defer gzw.Close()
+		defer func() {
+			gzw.Flush()
+			gzw.Close()
+		}()
+
 		c.Writer = &gzipWriter{
 			ResponseWriter: c.Writer,
 			writer:         gzw,
 		}
 		c.Writer.Header().Set("Content-Encoding", "gzip")
-		gzw.Flush()
 
 		c.Next()
 	}
