@@ -6,7 +6,7 @@ import (
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/eventlog"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
-	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
+	"github.com/mp1947/ya-url-shortener/internal/repository/database"
 	"github.com/mp1947/ya-url-shortener/internal/router"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"go.uber.org/zap"
@@ -36,8 +36,13 @@ func main() {
 
 	logger.Info("creating and initializing storage")
 
-	storage := &inmemory.Memory{}
-	storage.Init()
+	// storage := &inmemory.Memory{}
+	storage := &database.Database{}
+	err = storage.Init(cfg)
+
+	if err != nil {
+		log.Fatal("error initializing storage", zap.Error(err))
+	}
 
 	logger.Info(
 		"storage has been initialized",
@@ -67,7 +72,7 @@ func main() {
 		EP:      *ep,
 	}
 
-	r := router.CreateRouter(cfg, &service, logger)
+	r := router.CreateRouter(cfg, &service, storage, logger)
 
 	logger.Info(
 		"router has been created. web server is ready to start",

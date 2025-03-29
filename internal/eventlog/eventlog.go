@@ -60,7 +60,13 @@ func (ep *EventProcessor) RestoreFromFile(
 	if err != nil {
 		return 0, err
 	}
-	defer file.Close()
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			logger.Warn("error while closing file", zap.Error(err))
+		}
+	}()
+
 	scanner := bufio.NewScanner(file)
 	currentUUID := 0
 

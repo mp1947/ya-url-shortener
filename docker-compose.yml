@@ -1,0 +1,19 @@
+---
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:17.4
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATA: /data/postgres
+    volumes:
+       - ./data/postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - app
+
+networks:
+  app:
+    name: app

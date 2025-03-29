@@ -2,6 +2,7 @@ package handler
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -87,7 +88,7 @@ func TestShortenURL(t *testing.T) {
 			result := w.Result()
 
 			body := result.Body
-			defer body.Close()
+			defer body.Close() //nolint:errcheck
 
 			bodyData, err := io.ReadAll(body)
 			statusCode := result.StatusCode
@@ -109,7 +110,10 @@ func TestGetOriginalURLByID(t *testing.T) {
 	randomID := usecase.GenerateIDFromURL(testURL)
 
 	storage := &inmemory.Memory{}
-	storage.Init()
+	err := storage.Init(cfg)
+	if err != nil {
+		t.Fatalf("error initializing storage: %v", err)
+	}
 	storage.Save(randomID, testURL)
 
 	service := service.ShortenService{Storage: storage}
@@ -166,7 +170,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 			respStatusCode := result.StatusCode
 			location := result.Header.Get("Location")
 
-			defer result.Body.Close()
+			defer result.Body.Close() //nolint:errcheck
 
 			assert.Equal(t, test.expectedStatusCode, respStatusCode)
 
@@ -244,7 +248,7 @@ func TestJSONShortenURL(t *testing.T) {
 			result := w.Result()
 
 			body := result.Body
-			defer body.Close()
+			defer body.Close() //nolint:errcheck
 
 			bodyData, err := io.ReadAll(body)
 			statusCode := result.StatusCode
@@ -264,7 +268,11 @@ func TestJSONShortenURL(t *testing.T) {
 func initTestHandlerService() HandlerService {
 
 	storage := &inmemory.Memory{}
-	storage.Init()
+	err := storage.Init(cfg)
+
+	if err != nil {
+		log.Fatalf("error initializing storage: %v", err)
+	}
 
 	ep, err := eventlog.NewEventProcessor(cfg)
 

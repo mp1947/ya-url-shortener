@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
+	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 )
 
@@ -20,6 +21,7 @@ const (
 type HandlerService struct {
 	Service service.Service
 	Cfg     config.Config
+	Storage repository.Repository
 }
 
 func (s HandlerService) ShortenURL(c *gin.Context) {
@@ -84,4 +86,13 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, dto.ShortenResponse{Result: shortURL})
 
+}
+
+func (s HandlerService) Ping(c *gin.Context) {
+	err := s.Storage.Ping()
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+	c.Status(http.StatusOK)
 }
