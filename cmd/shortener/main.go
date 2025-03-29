@@ -6,7 +6,9 @@ import (
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/eventlog"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
+	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
+	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/router"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"go.uber.org/zap"
@@ -36,8 +38,13 @@ func main() {
 
 	logger.Info("creating and initializing storage")
 
-	// storage := &inmemory.Memory{}
-	storage := &database.Database{}
+	var storage repository.Repository
+
+	if *cfg.DatabaseDSN != "" {
+		storage = &database.Database{}
+	} else {
+		storage = &inmemory.Memory{}
+	}
 	err = storage.Init(cfg)
 
 	if err != nil {
@@ -46,7 +53,7 @@ func main() {
 
 	logger.Info(
 		"storage has been initialized",
-		zap.String("type", storage.StorageType),
+		zap.String("type", storage.GetType()),
 	)
 
 	ep, err := eventlog.NewEventProcessor(cfg)
