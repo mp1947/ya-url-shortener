@@ -1,6 +1,9 @@
 package inmemory
 
-import "github.com/mp1947/ya-url-shortener/config"
+import (
+	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/entity"
+)
 
 type Memory struct {
 	data        map[string]string
@@ -20,6 +23,13 @@ func (s *Memory) Save(shortURL, originalURL string) (bool, error) {
 		isSaved = true
 	}
 	return isSaved, nil
+}
+
+func (s *Memory) SaveBatch(urls []entity.URL) (bool, error) {
+	for _, v := range urls {
+		s.data[v.ShortURLID] = v.OriginalURL
+	}
+	return true, nil
 }
 
 func (s *Memory) Get(shortURL string) (string, error) {

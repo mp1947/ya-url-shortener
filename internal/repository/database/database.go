@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/entity"
 )
 
 type Database struct {
@@ -50,6 +51,36 @@ func (d *Database) Save(shortURL, originalURL string) (bool, error) {
 	}
 	return true, nil
 }
+
+func (d *Database) SaveBatch(urls []entity.URL) (bool, error) {
+	tx, err := d.conn.Begin(context.TODO())
+	if err != nil {
+		return false, err
+	}
+
+	query := `INSERT INTO urls (short_url, original_url) VALUES (@shortURL, @originalURL)`
+
+	for _, v := range urls {
+		args := pgx.NamedArgs{
+			"shortURL":    v.ShortURLID,
+			"originalURL": v.OriginalURL,
+		}
+		_, err := tx.Exec(context.TODO(), query, args)
+		if err != nil {
+			tx.Rollback(context.TODO())
+			return false, err
+		}
+	}
+
+	err = tx.Commit(context.TODO())
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (d *Database) Get(shortURL string) (string, error) {
 	query := "SELECT original_url FROM urls where short_url = @shortURL"
 	args := pgx.NamedArgs{

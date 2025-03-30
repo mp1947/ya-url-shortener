@@ -111,3 +111,31 @@ func (s HandlerService) Ping(c *gin.Context) {
 	}
 	c.Status(http.StatusOK)
 }
+
+func (s HandlerService) BatchShortenURL(c *gin.Context) {
+	var batchRequestData []dto.BatchShortenRequest
+	if err := c.ShouldBindJSON(&batchRequestData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "incorrect request body (error json binding)",
+		})
+		return
+	}
+
+	if len(batchRequestData) < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "incorrect request body (items in array less than 1)",
+		})
+		return
+	}
+
+	data, err := s.Service.ShortenURLBatch(s.Cfg, batchRequestData)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "error while batch url shorten",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, data)
+}

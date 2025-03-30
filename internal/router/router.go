@@ -31,6 +31,7 @@ func CreateRouter(
 
 	api := r.Group("/api")
 	api.POST("/shorten", h.JSONShortenURL)
+	api.POST("/shorten/batch", h.BatchShortenURL)
 
 	return r
 }
