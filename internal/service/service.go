@@ -11,8 +11,8 @@ import (
 )
 
 type Service interface {
-	ShortenURL(cfg config.Config, url string) string
-	GetOriginalURL(shortURLID string) string
+	ShortenURL(cfg config.Config, url string) (string, error)
+	GetOriginalURL(shortURLID string) (string, error)
 }
 
 type ShortenService struct {
@@ -20,9 +20,13 @@ type ShortenService struct {
 	EP      eventlog.EventProcessor
 }
 
-func (s *ShortenService) ShortenURL(cfg config.Config, url string) string {
+func (s *ShortenService) ShortenURL(cfg config.Config, url string) (string, error) {
 	ShortURLID := usecase.GenerateIDFromURL(url)
-	isSaved := s.Storage.Save(ShortURLID, url)
+	isSaved, err := s.Storage.Save(ShortURLID, url)
+
+	if err != nil {
+		return "", err
+	}
 
 	if isSaved {
 		s.EP.IncrementUUID()
@@ -34,9 +38,13 @@ func (s *ShortenService) ShortenURL(cfg config.Config, url string) string {
 		s.EP.WriteEvent(&event)
 	}
 
-	return fmt.Sprintf("%s/%s", *cfg.BaseURL, ShortURLID)
+	return fmt.Sprintf("%s/%s", *cfg.BaseURL, ShortURLID), nil
 }
 
-func (s *ShortenService) GetOriginalURL(shortURLID string) string {
-	return s.Storage.Get(shortURLID)
+func (s *ShortenService) GetOriginalURL(shortURLID string) (string, error) {
+	data, err := s.Storage.Get(shortURLID)
+	if err != nil {
+		return "", err
+	}
+	return data, nil
 }

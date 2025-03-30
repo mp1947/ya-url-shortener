@@ -13,17 +13,17 @@ func (s *Memory) Init(cfg config.Config) error {
 	return nil
 }
 
-func (s *Memory) Save(shortURL, originalURL string) bool {
+func (s *Memory) Save(shortURL, originalURL string) (bool, error) {
 	isSaved := false
 	if s.data[shortURL] == "" {
 		s.data[shortURL] = originalURL
 		isSaved = true
 	}
-	return isSaved
+	return isSaved, nil
 }
 
-func (s *Memory) Get(shortURL string) string {
-	return s.data[shortURL]
+func (s *Memory) Get(shortURL string) (string, error) {
+	return s.data[shortURL], nil
 }
 
 func (s *Memory) GetType() string {

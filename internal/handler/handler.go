@@ -38,7 +38,12 @@ func (s HandlerService) ShortenURL(c *gin.Context) {
 		return
 	}
 
-	shortURL := s.Service.ShortenURL(s.Cfg, string(body))
+	shortURL, err := s.Service.ShortenURL(s.Cfg, string(body))
+
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
 
 	c.Data(http.StatusCreated, contentType, []byte(shortURL))
 
@@ -52,7 +57,11 @@ func (s HandlerService) GetOriginalURLByID(c *gin.Context) {
 
 	id := c.Param("id")
 
-	originalURL := s.Service.GetOriginalURL(id)
+	originalURL, err := s.Service.GetOriginalURL(id)
+	if err != nil {
+		c.Status(http.StatusInternalServerError)
+		return
+	}
 	if originalURL != "" {
 		c.Header("Location", originalURL)
 		c.Data(http.StatusTemporaryRedirect, contentType, nil)
@@ -82,7 +91,13 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 		return
 	}
 
-	shortURL := s.Service.ShortenURL(s.Cfg, string(request.URL))
+	shortURL, err := s.Service.ShortenURL(s.Cfg, string(request.URL))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "internal error while shorten url",
+		})
+		return
+	}
 
 	c.JSON(http.StatusCreated, dto.ShortenResponse{Result: shortURL})
 

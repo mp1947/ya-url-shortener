@@ -45,9 +45,8 @@ func main() {
 	} else {
 		storage = &inmemory.Memory{}
 	}
-	err = storage.Init(cfg)
 
-	if err != nil {
+	if err := storage.Init(cfg); err != nil {
 		log.Fatal("error initializing storage", zap.Error(err))
 	}
 
