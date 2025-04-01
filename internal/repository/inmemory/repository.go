@@ -15,17 +15,18 @@ import (
 )
 
 type Memory struct {
-	data        map[string]string
-	cfg         config.Config
-	EP          *eventlog.EventProcessor
-	StorageType string
+	data            map[string]string
+	cfg             config.Config
+	EP              *eventlog.EventProcessor
+	isInRestoreMode bool
+	StorageType     string
 }
 
 func (s *Memory) Init(cfg config.Config, ctx context.Context) error {
 	var err error
 
 	s.cfg = cfg
-
+	s.isInRestoreMode = false
 	s.data = make(map[string]string)
 	s.StorageType = "inmemory"
 	s.EP, err = eventlog.NewEventProcessor(s.cfg)
@@ -46,7 +47,9 @@ func (s *Memory) Save(ctx context.Context, shortURLID, originalURL string) error
 			ShortURL:    shortURLID,
 			OriginalURL: originalURL,
 		}
-		s.EP.WriteEvent(&event)
+		if !s.isInRestoreMode {
+			s.EP.WriteEvent(&event)
+		}
 		return nil
 	}
 	return shrterr.ErrOriginalURLAlreadyExists
@@ -84,6 +87,8 @@ func (s *Memory) RestoreFromFile(l *zap.Logger) (int, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	s.isInRestoreMode = true
+
 	for scanner.Scan() {
 		var event eventlog.Event
 		line := scanner.Text()
@@ -98,5 +103,7 @@ func (s *Memory) RestoreFromFile(l *zap.Logger) (int, error) {
 		currentUUID += 1
 	}
 	s.EP.CurrentUUID = currentUUID
+	s.isInRestoreMode = false
+
 	return currentUUID, nil
 }
