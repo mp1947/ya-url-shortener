@@ -44,7 +44,7 @@ func (cfg *Config) InitConfig() {
 	cfg.ListenAddr = flag.String("a", defaultListenAddr, "-a :8080")
 	cfg.BaseURL = flag.String("b", defaultBaseURL, "-b http://localhost:8080")
 	cfg.FileStoragePath = flag.String("f", defaultFileStoragePath, "-f ./storage/storage.txt")
-	cfg.DatabaseDSN = flag.String("d", "", "-d postgres://app:pass@localhost:5432/app")
+	cfg.DatabaseDSN = flag.String("d", "", "-d postgres://app:pass@localhost:5432/app?pool_max_conns=10&pool_max_conn_lifetime=1h30m")
 	flag.Parse()
 
 	if addr := os.Getenv("SERVER_ADDRESS"); addr != "" {

@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
@@ -51,22 +50,17 @@ func (s *ShortenService) ShortenURL(cfg config.Config, url string) (string, erro
 		return "", err
 	}
 
-	s.EP.IncrementUUID()
-	event := eventlog.Event{
-		UUID:        strconv.Itoa(s.EP.CurrentUUID),
-		ShortURL:    shortURLID,
-		OriginalURL: url,
-	}
-	s.EP.WriteEvent(&event)
-
-	return fmt.Sprintf("%s/%s", *cfg.BaseURL, shortURLID), nil
+	return generateShortURL(*cfg.BaseURL, shortURLID), nil
 }
 
 func (s *ShortenService) ShortenURLBatch(
 	cfg config.Config,
 	batchData []dto.BatchShortenRequest,
 ) ([]dto.BatchShortenResponse, error) {
-	s.Logger.Info("processing batch of urls")
+	s.Logger.Info(
+		"processing batch of urls",
+		zap.Any("batch_data", batchData),
+	)
 
 	urls := make([]entity.URL, len(batchData))
 	result := make([]dto.BatchShortenResponse, len(batchData))
@@ -89,15 +83,24 @@ func (s *ShortenService) ShortenURLBatch(
 		return nil, err
 	}
 
+	s.Logger.Info("batch of urls were successfully processed")
+
 	return result, nil
 
 }
 
 func (s *ShortenService) GetOriginalURL(shortURLID string) (string, error) {
+	s.Logger.Info("processing short url with id", zap.String("short_url_id", shortURLID))
 	data, err := s.Storage.Get(shortURLID)
 	if err != nil {
+		s.Logger.Warn("error getting original_url by short_url_id", zap.String("short_url", shortURLID))
 		return "", err
 	}
+	s.Logger.Info(
+		"retrieved original_url by short_url_id",
+		zap.String("short_url_id", shortURLID),
+		zap.String("original_url", data),
+	)
 	return data, nil
 }
 

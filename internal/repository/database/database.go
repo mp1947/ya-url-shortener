@@ -15,21 +15,29 @@ import (
 
 type Database struct {
 	conn        *pgxpool.Pool
+	cfg         config.Config
 	StorageType string
 }
 
-func (d *Database) Init(cfg config.Config) error {
+func (d *Database) Init(cfg config.Config, ctx context.Context) error {
 	var err error
-	d.conn, err = pgxpool.New(context.TODO(), *cfg.DatabaseDSN)
-	if err != nil {
-		return err
-	}
-	_, err = d.conn.Exec(context.TODO(), createTableQuery)
+	d.cfg = cfg
+	pgConfig, err := pgxpool.ParseConfig(*d.cfg.DatabaseDSN)
+
 	if err != nil {
 		return err
 	}
 
-	_, err = d.conn.Exec(context.TODO(), createIndexQuery)
+	d.conn, err = pgxpool.NewWithConfig(ctx, pgConfig)
+	if err != nil {
+		return err
+	}
+	_, err = d.conn.Exec(ctx, createTableQuery)
+	if err != nil {
+		return err
+	}
+
+	_, err = d.conn.Exec(ctx, createIndexQuery)
 	if err != nil {
 		return err
 	}
@@ -108,4 +116,8 @@ func (d *Database) Close() {
 
 func (d *Database) Ping() error {
 	return d.conn.Ping(context.TODO())
+}
+
+func (d *Database) RestoreFromFile() (int, error) {
+	return 0, nil
 }

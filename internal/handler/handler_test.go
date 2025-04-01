@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"io"
 	"log"
 	"net/http"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/eventlog"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/service"
@@ -32,6 +32,9 @@ var cfg = config.Config{
 	BaseURL:         &baseURL,
 	FileStoragePath: &fileStoragePath,
 }
+var storage = &inmemory.Memory{}
+var storageInitializedErr = storage.Init(cfg, context.Background())
+var hs = initTestHandlerService()
 
 func TestShortenURL(t *testing.T) {
 
@@ -72,7 +75,6 @@ func TestShortenURL(t *testing.T) {
 		},
 	}
 
-	h := initTestHandlerService()
 	gin.SetMode(gin.TestMode)
 
 	for _, test := range tests {
@@ -84,7 +86,7 @@ func TestShortenURL(t *testing.T) {
 
 			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
 
-			h.ShortenURL(c)
+			hs.ShortenURL(c)
 
 			result := w.Result()
 
@@ -110,15 +112,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 
 	randomID := usecase.GenerateIDFromURL(testURL)
 
-	storage := &inmemory.Memory{}
-	err := storage.Init(cfg)
-	if err != nil {
-		t.Fatalf("error initializing storage: %v", err)
-	}
 	storage.Save(randomID, testURL)
-
-	service := service.ShortenService{Storage: storage}
-	h := HandlerService{Service: &service}
 
 	type request struct {
 		httpMethod    string
@@ -164,7 +158,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 				},
 			}
 
-			h.GetOriginalURLByID(c)
+			hs.GetOriginalURLByID(c)
 
 			result := w.Result()
 
@@ -227,8 +221,6 @@ func TestJSONShortenURL(t *testing.T) {
 		},
 	}
 
-	h := initTestHandlerService()
-
 	gin.SetMode(gin.TestMode)
 
 	for _, tc := range tests {
@@ -244,7 +236,7 @@ func TestJSONShortenURL(t *testing.T) {
 
 			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
 
-			h.JSONShortenURL(c)
+			hs.JSONShortenURL(c)
 
 			result := w.Result()
 
@@ -268,22 +260,13 @@ func TestJSONShortenURL(t *testing.T) {
 
 func initTestHandlerService() HandlerService {
 
-	storage := &inmemory.Memory{}
-	err := storage.Init(cfg)
-
-	if err != nil {
-		log.Fatalf("error initializing storage: %v", err)
-	}
-
-	ep, err := eventlog.NewEventProcessor(cfg)
-
-	if err != nil {
-		panic(err)
+	if storageInitializedErr != nil {
+		log.Fatalf("error initializing storage: %v", storageInitializedErr)
 	}
 
 	logger, _ := logger.InitLogger()
 
-	service := service.ShortenService{Storage: storage, EP: *ep, Logger: logger}
+	service := service.ShortenService{Storage: storage, Logger: logger}
 
 	return HandlerService{Service: &service, Cfg: cfg}
 }

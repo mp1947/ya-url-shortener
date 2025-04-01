@@ -1,13 +1,10 @@
 package eventlog
 
 import (
-	"bufio"
 	"encoding/json"
 	"os"
 
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/repository"
-	"go.uber.org/zap"
 )
 
 type Event struct {
@@ -47,42 +44,34 @@ func (ep *EventProcessor) IncrementUUID() {
 	ep.CurrentUUID++
 }
 
-func (ep *EventProcessor) setUUID(uuid int) {
-	ep.CurrentUUID = uuid
-}
+// func (ep *EventProcessor) SetUUID(uuid int) {
+// 	ep.CurrentUUID = uuid
+// }
 
-func (ep *EventProcessor) RestoreFromFile(
-	cfg config.Config,
-	r repository.Repository,
-	logger *zap.Logger,
-) (int, error) {
-	file, err := os.OpenFile(*cfg.FileStoragePath, os.O_RDONLY|os.O_CREATE, 0666)
-	if err != nil {
-		return 0, err
-	}
-	defer func() {
-		err := file.Close()
-		if err != nil {
-			logger.Warn("error while closing file", zap.Error(err))
-		}
-	}()
+// func (ep *EventProcessor) RestoreFromFile(
+// 	cfg config.Config,
+// 	m inmemory.Memory,
+// ) (int, error) {
+// 	file, err := os.OpenFile(*cfg.FileStoragePath, os.O_RDONLY|os.O_CREATE, 0666)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	currentUUID := 0
+// 	scanner := bufio.NewScanner(file)
+// 	currentUUID := 0
 
-	for scanner.Scan() {
-		var event Event
-		line := scanner.Text()
+// 	for scanner.Scan() {
+// 		var event Event
+// 		line := scanner.Text()
 
-		if err := json.Unmarshal([]byte(line), &event); err != nil {
-			logger.Warn("unmarshal error", zap.Int("uuid", currentUUID), zap.Error(err))
-		}
-		if r.GetType() == "inmemory" {
-			r.Save(event.ShortURL, event.OriginalURL)
-		}
+// 		if err := json.Unmarshal([]byte(line), &event); err != nil {
+// 			return 0, err
+// 		}
+// 		m.Save(event.ShortURL, event.OriginalURL)
 
-		currentUUID += 1
-	}
-	ep.setUUID(currentUUID)
-	return currentUUID, nil
-}
+// 		currentUUID += 1
+// 	}
+// 	ep.setUUID(currentUUID)
+// 	return currentUUID, nil
+// }
