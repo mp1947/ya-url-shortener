@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
@@ -50,13 +51,13 @@ func (s *ShortenService) ShortenURL(cfg config.Config, url string) (string, erro
 		return "", err
 	}
 
-	// s.EP.IncrementUUID()
-	// event := eventlog.Event{
-	// 	UUID:        strconv.Itoa(s.EP.CurrentUUID),
-	// 	ShortURL:    ShortURLID,
-	// 	OriginalURL: url,
-	// }
-	// s.EP.WriteEvent(&event)
+	s.EP.IncrementUUID()
+	event := eventlog.Event{
+		UUID:        strconv.Itoa(s.EP.CurrentUUID),
+		ShortURL:    shortURLID,
+		OriginalURL: url,
+	}
+	s.EP.WriteEvent(&event)
 
 	return fmt.Sprintf("%s/%s", *cfg.BaseURL, shortURLID), nil
 }
