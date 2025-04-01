@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/eventlog"
+	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
@@ -280,7 +281,9 @@ func initTestHandlerService() HandlerService {
 		panic(err)
 	}
 
-	service := service.ShortenService{Storage: storage, EP: *ep}
+	logger, _ := logger.InitLogger()
+
+	service := service.ShortenService{Storage: storage, EP: *ep, Logger: logger}
 
 	return HandlerService{Service: &service, Cfg: cfg}
 }
