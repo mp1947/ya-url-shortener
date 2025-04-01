@@ -40,7 +40,7 @@ func (s HandlerService) ShortenURL(c *gin.Context) {
 		return
 	}
 
-	shortURL, err := s.Service.ShortenURL(s.Cfg, string(body))
+	shortURL, err := s.Service.ShortenURL(c.Request.Context(), s.Cfg, string(body))
 
 	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
 		c.Data(http.StatusConflict, contentType, []byte(shortURL))
@@ -66,7 +66,7 @@ func (s HandlerService) GetOriginalURLByID(c *gin.Context) {
 
 	id := c.Param("id")
 
-	originalURL, err := s.Service.GetOriginalURL(id)
+	originalURL, err := s.Service.GetOriginalURL(c.Request.Context(), id)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -100,7 +100,11 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 		return
 	}
 
-	shortURL, err := s.Service.ShortenURL(s.Cfg, string(request.URL))
+	shortURL, err := s.Service.ShortenURL(
+		c.Request.Context(),
+		s.Cfg,
+		string(request.URL),
+	)
 
 	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
 		c.JSON(http.StatusConflict, dto.ShortenResponse{Result: shortURL})
@@ -117,7 +121,7 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 }
 
 func (s HandlerService) Ping(c *gin.Context) {
-	err := s.Storage.Ping()
+	err := s.Storage.Ping(c.Request.Context())
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
@@ -141,7 +145,7 @@ func (s HandlerService) BatchShortenURL(c *gin.Context) {
 		return
 	}
 
-	data, err := s.Service.ShortenURLBatch(s.Cfg, batchRequestData)
+	data, err := s.Service.ShortenURLBatch(c.Request.Context(), s.Cfg, batchRequestData)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

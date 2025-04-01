@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -15,9 +16,13 @@ import (
 )
 
 type Service interface {
-	ShortenURL(cfg config.Config, url string) (string, error)
-	GetOriginalURL(shortURLID string) (string, error)
-	ShortenURLBatch(cfg config.Config, batchData []dto.BatchShortenRequest) ([]dto.BatchShortenResponse, error)
+	ShortenURL(ctx context.Context, cfg config.Config, url string) (string, error)
+	GetOriginalURL(ctx context.Context, shortURLID string) (string, error)
+	ShortenURLBatch(
+		ctx context.Context,
+		cfg config.Config,
+		batchData []dto.BatchShortenRequest,
+	) ([]dto.BatchShortenResponse, error)
 }
 
 type ShortenService struct {
@@ -26,7 +31,11 @@ type ShortenService struct {
 	Logger  *zap.Logger
 }
 
-func (s *ShortenService) ShortenURL(cfg config.Config, url string) (string, error) {
+func (s *ShortenService) ShortenURL(
+	ctx context.Context,
+	cfg config.Config,
+	url string,
+) (string, error) {
 	s.Logger.Info("shortening incoming url", zap.String("original_url", url))
 
 	shortURLID := usecase.GenerateIDFromURL(url)
@@ -37,7 +46,7 @@ func (s *ShortenService) ShortenURL(cfg config.Config, url string) (string, erro
 		zap.String("original_url", url),
 	)
 
-	err := s.Storage.Save(shortURLID, url)
+	err := s.Storage.Save(ctx, shortURLID, url)
 	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
 		s.Logger.Info(
 			"got an error from repository on save, returning error with short url",
@@ -54,6 +63,7 @@ func (s *ShortenService) ShortenURL(cfg config.Config, url string) (string, erro
 }
 
 func (s *ShortenService) ShortenURLBatch(
+	ctx context.Context,
 	cfg config.Config,
 	batchData []dto.BatchShortenRequest,
 ) ([]dto.BatchShortenResponse, error) {
@@ -77,7 +87,8 @@ func (s *ShortenService) ShortenURLBatch(
 			ShortURL:      fmt.Sprintf("%s/%s", *cfg.BaseURL, shortURLID),
 		}
 	}
-	_, err := s.Storage.SaveBatch(urls)
+
+	_, err := s.Storage.SaveBatch(ctx, urls)
 	if err != nil {
 		s.Logger.Warn("error while saving batch of urls", zap.Error(err))
 		return nil, err
@@ -89,9 +100,13 @@ func (s *ShortenService) ShortenURLBatch(
 
 }
 
-func (s *ShortenService) GetOriginalURL(shortURLID string) (string, error) {
+func (s *ShortenService) GetOriginalURL(
+	ctx context.Context,
+	shortURLID string,
+) (string, error) {
+
 	s.Logger.Info("processing short url with id", zap.String("short_url_id", shortURLID))
-	data, err := s.Storage.Get(shortURLID)
+	data, err := s.Storage.Get(ctx, shortURLID)
 	if err != nil {
 		s.Logger.Warn("error getting original_url by short_url_id", zap.String("short_url", shortURLID))
 		return "", err

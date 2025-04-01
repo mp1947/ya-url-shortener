@@ -9,10 +9,10 @@ import (
 
 type Repository interface {
 	Init(cfg config.Config, ctx context.Context) error
-	Save(shortURLID, originalURL string) error
-	SaveBatch(urls []entity.URL) (bool, error)
-	Get(shortURL string) (string, error)
-	Ping() error
+	Save(ctx context.Context, shortURLID, originalURL string) error
+	SaveBatch(ctx context.Context, urls []entity.URL) (bool, error)
+	Get(ctx context.Context, shortURL string) (string, error)
+	Ping(ctx context.Context) error
 	GetType() string
 	RestoreFromFile() (int, error)
 }

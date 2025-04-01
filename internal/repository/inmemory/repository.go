@@ -35,7 +35,7 @@ func (s *Memory) Init(cfg config.Config, ctx context.Context) error {
 	return nil
 }
 
-func (s *Memory) Save(shortURLID, originalURL string) error {
+func (s *Memory) Save(ctx context.Context, shortURLID, originalURL string) error {
 	if s.data[shortURLID] == "" {
 		s.data[shortURLID] = originalURL
 
@@ -51,14 +51,14 @@ func (s *Memory) Save(shortURLID, originalURL string) error {
 	return shrterr.ErrOriginalURLAlreadyExists
 }
 
-func (s *Memory) SaveBatch(urls []entity.URL) (bool, error) {
+func (s *Memory) SaveBatch(ctx context.Context, urls []entity.URL) (bool, error) {
 	for _, v := range urls {
 		s.data[v.ShortURLID] = v.OriginalURL
 	}
 	return true, nil
 }
 
-func (s *Memory) Get(shortURL string) (string, error) {
+func (s *Memory) Get(ctx context.Context, shortURL string) (string, error) {
 	return s.data[shortURL], nil
 }
 
@@ -66,7 +66,7 @@ func (s *Memory) GetType() string {
 	return s.StorageType
 }
 
-func (s *Memory) Ping() error {
+func (s *Memory) Ping(ctx context.Context) error {
 	return nil
 }
 
@@ -79,6 +79,8 @@ func (s *Memory) RestoreFromFile() (int, error) {
 
 	scanner := bufio.NewScanner(file)
 	currentUUID := 0
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	for scanner.Scan() {
 		var event eventlog.Event
@@ -87,7 +89,7 @@ func (s *Memory) RestoreFromFile() (int, error) {
 		if err := json.Unmarshal([]byte(line), &event); err != nil {
 			return 0, err
 		}
-		s.Save(event.ShortURL, event.OriginalURL)
+		s.Save(ctx, event.ShortURL, event.OriginalURL)
 
 		currentUUID += 1
 	}

@@ -45,14 +45,14 @@ func (d *Database) Init(cfg config.Config, ctx context.Context) error {
 	d.StorageType = "database"
 	return nil
 }
-func (d *Database) Save(shortURLID, originalURL string) error {
+func (d *Database) Save(ctx context.Context, shortURLID, originalURL string) error {
 
 	args := pgx.NamedArgs{
 		"shortURL":    shortURLID,
 		"originalURL": originalURL,
 	}
 
-	_, err := d.conn.Exec(context.TODO(), insertShortURLQuery, args)
+	_, err := d.conn.Exec(ctx, insertShortURLQuery, args)
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		switch pgErr.Code {
@@ -66,8 +66,8 @@ func (d *Database) Save(shortURLID, originalURL string) error {
 	return nil
 }
 
-func (d *Database) SaveBatch(urls []entity.URL) (bool, error) {
-	tx, err := d.conn.Begin(context.TODO())
+func (d *Database) SaveBatch(ctx context.Context, urls []entity.URL) (bool, error) {
+	tx, err := d.conn.Begin(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -77,14 +77,14 @@ func (d *Database) SaveBatch(urls []entity.URL) (bool, error) {
 			"shortURL":    v.ShortURLID,
 			"originalURL": v.OriginalURL,
 		}
-		_, err := tx.Exec(context.TODO(), insertShortURLQuery, args)
+		_, err := tx.Exec(ctx, insertShortURLQuery, args)
 		if err != nil {
-			tx.Rollback(context.TODO())
+			tx.Rollback(ctx)
 			return false, err
 		}
 	}
 
-	err = tx.Commit(context.TODO())
+	err = tx.Commit(ctx)
 
 	if err != nil {
 		return false, err
@@ -93,11 +93,11 @@ func (d *Database) SaveBatch(urls []entity.URL) (bool, error) {
 	return true, nil
 }
 
-func (d *Database) Get(shortURL string) (string, error) {
+func (d *Database) Get(ctx context.Context, shortURL string) (string, error) {
 	args := pgx.NamedArgs{
 		"shortURL": shortURL,
 	}
-	row := d.conn.QueryRow(context.TODO(), getOriginalURLByShortIDQuery, args)
+	row := d.conn.QueryRow(ctx, getOriginalURLByShortIDQuery, args)
 	var shortURLFromDB string
 	err := row.Scan(&shortURLFromDB)
 	if err != nil {
@@ -114,8 +114,8 @@ func (d *Database) Close() {
 	d.conn.Close()
 }
 
-func (d *Database) Ping() error {
-	return d.conn.Ping(context.TODO())
+func (d *Database) Ping(ctx context.Context) error {
+	return d.conn.Ping(ctx)
 }
 
 func (d *Database) RestoreFromFile() (int, error) {

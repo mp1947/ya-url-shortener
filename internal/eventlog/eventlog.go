@@ -43,35 +43,3 @@ func (ep *EventProcessor) WriteEvent(e *Event) error {
 func (ep *EventProcessor) IncrementUUID() {
 	ep.CurrentUUID++
 }
-
-// func (ep *EventProcessor) SetUUID(uuid int) {
-// 	ep.CurrentUUID = uuid
-// }
-
-// func (ep *EventProcessor) RestoreFromFile(
-// 	cfg config.Config,
-// 	m inmemory.Memory,
-// ) (int, error) {
-// 	file, err := os.OpenFile(*cfg.FileStoragePath, os.O_RDONLY|os.O_CREATE, 0666)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-// 	defer file.Close()
-
-// 	scanner := bufio.NewScanner(file)
-// 	currentUUID := 0
-
-// 	for scanner.Scan() {
-// 		var event Event
-// 		line := scanner.Text()
-
-// 		if err := json.Unmarshal([]byte(line), &event); err != nil {
-// 			return 0, err
-// 		}
-// 		m.Save(event.ShortURL, event.OriginalURL)
-
-// 		currentUUID += 1
-// 	}
-// 	ep.setUUID(currentUUID)
-// 	return currentUUID, nil
-// }

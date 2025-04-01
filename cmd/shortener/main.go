@@ -36,7 +36,7 @@ func main() {
 		zap.String("base_url", *cfg.BaseURL),
 	)
 
-	logger.Info("creating and initializing storage")
+	logger.Info("initializing storage backend")
 
 	var storage repository.Repository
 
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	if err := storage.Init(cfg, ctx); err != nil {
-		log.Fatal("error initializing storage", zap.Error(err))
+		log.Fatal("error initializing storage backend", zap.Error(err))
 	}
 
 	switch storage.GetType() {
@@ -61,6 +61,8 @@ func main() {
 			logger.Fatal("error loading data from file", zap.Error(err))
 		}
 		logger.Info("records restored", zap.Int("count", numRecordsRestored))
+	case "database":
+		logger.Info("no needed to restore from file for database storage backend")
 	}
 
 	logger.Info(

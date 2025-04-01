@@ -112,7 +112,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 
 	randomID := usecase.GenerateIDFromURL(testURL)
 
-	storage.Save(randomID, testURL)
+	storage.Save(context.TODO(), randomID, testURL)
 
 	type request struct {
 		httpMethod    string
