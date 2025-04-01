@@ -49,7 +49,7 @@ func (s *ShortenService) ShortenURL(
 	err := s.Storage.Save(ctx, shortURLID, url)
 	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
 		s.Logger.Info(
-			"got an error from repository on save, returning error with short url",
+			"original_url already exists, returning error with short url",
 			zap.Error(err),
 			zap.String("original_url", url),
 		)

@@ -11,6 +11,7 @@ import (
 	"github.com/mp1947/ya-url-shortener/internal/entity"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 	"github.com/mp1947/ya-url-shortener/internal/eventlog"
+	"go.uber.org/zap"
 )
 
 type Memory struct {
@@ -67,10 +68,11 @@ func (s *Memory) GetType() string {
 }
 
 func (s *Memory) Ping(ctx context.Context) error {
+	// placeholder method to satisfy interface
 	return nil
 }
 
-func (s *Memory) RestoreFromFile() (int, error) {
+func (s *Memory) RestoreFromFile(l *zap.Logger) (int, error) {
 	file, err := os.OpenFile(*s.cfg.FileStoragePath, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return 0, err
@@ -89,7 +91,9 @@ func (s *Memory) RestoreFromFile() (int, error) {
 		if err := json.Unmarshal([]byte(line), &event); err != nil {
 			return 0, err
 		}
-		s.Save(ctx, event.ShortURL, event.OriginalURL)
+		if err := s.Save(ctx, event.ShortURL, event.OriginalURL); err != nil {
+			l.Warn("error saving record to file during restore phase", zap.Error(err))
+		}
 
 		currentUUID += 1
 	}

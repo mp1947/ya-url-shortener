@@ -5,6 +5,7 @@ import (
 
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
+	"go.uber.org/zap"
 )
 
 type Repository interface {
@@ -14,5 +15,5 @@ type Repository interface {
 	Get(ctx context.Context, shortURL string) (string, error)
 	Ping(ctx context.Context) error
 	GetType() string
-	RestoreFromFile() (int, error)
+	RestoreFromFile(l *zap.Logger) (int, error)
 }

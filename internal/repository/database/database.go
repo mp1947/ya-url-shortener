@@ -11,6 +11,7 @@ import (
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
+	"go.uber.org/zap"
 )
 
 type Database struct {
@@ -118,6 +119,7 @@ func (d *Database) Ping(ctx context.Context) error {
 	return d.conn.Ping(ctx)
 }
 
-func (d *Database) RestoreFromFile() (int, error) {
+func (d *Database) RestoreFromFile(l *zap.Logger) (int, error) {
+	// placeholder method to satisfy interface
 	return 0, nil
 }
