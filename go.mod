@@ -4,6 +4,7 @@ go 1.22.12
 
 require (
 	github.com/gin-gonic/gin v1.10.0
+	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0

@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
+	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 )
 
 type Database struct {
@@ -21,35 +24,38 @@ func (d *Database) Init(cfg config.Config) error {
 	if err != nil {
 		return err
 	}
-	_, err = d.conn.Exec(context.TODO(), "CREATE TABLE IF NOT EXISTS urls "+
-		"(uuid SERIAL PRIMARY KEY, short_url VARCHAR(255) NOT NULL, original_url VARCHAR(255) NOT NULL)",
-	)
+	_, err = d.conn.Exec(context.TODO(), createTableQuery)
 	if err != nil {
 		return err
 	}
+
+	_, err = d.conn.Exec(context.TODO(), createIndexQuery)
+	if err != nil {
+		return err
+	}
+
 	d.StorageType = "database"
 	return nil
 }
-func (d *Database) Save(shortURL, originalURL string) (bool, error) {
-	data, err := d.Get(shortURL)
-	if !errors.Is(err, pgx.ErrNoRows) {
-		return false, err
-	}
-	if data != "" {
-		return false, nil
-	}
+func (d *Database) Save(shortURLID, originalURL string) error {
 
-	query := `INSERT INTO urls (short_url, original_url) VALUES (@shortURL, @originalURL)`
 	args := pgx.NamedArgs{
-		"shortURL":    shortURL,
+		"shortURL":    shortURLID,
 		"originalURL": originalURL,
 	}
 
-	_, err = d.conn.Exec(context.TODO(), query, args)
-	if err != nil {
-		return false, err
+	_, err := d.conn.Exec(context.TODO(), insertShortURLQuery, args)
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		switch pgErr.Code {
+		case pgerrcode.UniqueViolation:
+			return shrterr.ErrOriginalURLAlreadyExists
+		}
+	} else if err != nil {
+		return err
 	}
-	return true, nil
+
+	return nil
 }
 
 func (d *Database) SaveBatch(urls []entity.URL) (bool, error) {
@@ -58,14 +64,12 @@ func (d *Database) SaveBatch(urls []entity.URL) (bool, error) {
 		return false, err
 	}
 
-	query := `INSERT INTO urls (short_url, original_url) VALUES (@shortURL, @originalURL)`
-
 	for _, v := range urls {
 		args := pgx.NamedArgs{
 			"shortURL":    v.ShortURLID,
 			"originalURL": v.OriginalURL,
 		}
-		_, err := tx.Exec(context.TODO(), query, args)
+		_, err := tx.Exec(context.TODO(), insertShortURLQuery, args)
 		if err != nil {
 			tx.Rollback(context.TODO())
 			return false, err
@@ -82,11 +86,10 @@ func (d *Database) SaveBatch(urls []entity.URL) (bool, error) {
 }
 
 func (d *Database) Get(shortURL string) (string, error) {
-	query := "SELECT original_url FROM urls where short_url = @shortURL"
 	args := pgx.NamedArgs{
 		"shortURL": shortURL,
 	}
-	row := d.conn.QueryRow(context.TODO(), query, args)
+	row := d.conn.QueryRow(context.TODO(), getOriginalURLByShortIDQuery, args)
 	var shortURLFromDB string
 	err := row.Scan(&shortURLFromDB)
 	if err != nil {

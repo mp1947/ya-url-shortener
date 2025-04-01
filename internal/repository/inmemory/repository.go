@@ -3,6 +3,7 @@ package inmemory
 import (
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
+	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 )
 
 type Memory struct {
@@ -16,13 +17,12 @@ func (s *Memory) Init(cfg config.Config) error {
 	return nil
 }
 
-func (s *Memory) Save(shortURL, originalURL string) (bool, error) {
-	isSaved := false
+func (s *Memory) Save(shortURL, originalURL string) error {
 	if s.data[shortURL] == "" {
 		s.data[shortURL] = originalURL
-		isSaved = true
+		return nil
 	}
-	return isSaved, nil
+	return shrterr.ErrOriginalURLAlreadyExists
 }
 
 func (s *Memory) SaveBatch(urls []entity.URL) (bool, error) {

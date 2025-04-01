@@ -2,12 +2,14 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
+	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 )
@@ -40,8 +42,15 @@ func (s HandlerService) ShortenURL(c *gin.Context) {
 
 	shortURL, err := s.Service.ShortenURL(s.Cfg, string(body))
 
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
+	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
+		c.Data(http.StatusConflict, contentType, []byte(shortURL))
+		return
+	} else if err != nil {
+		c.Data(
+			http.StatusInternalServerError,
+			contentType,
+			[]byte("internal server error while shorten url"),
+		)
 		return
 	}
 
@@ -92,9 +101,13 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 	}
 
 	shortURL, err := s.Service.ShortenURL(s.Cfg, string(request.URL))
-	if err != nil {
+
+	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
+		c.JSON(http.StatusConflict, dto.ShortenResponse{Result: shortURL})
+		return
+	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "internal error while shorten url",
+			"message": "internal server error while shorten url",
 		})
 		return
 	}

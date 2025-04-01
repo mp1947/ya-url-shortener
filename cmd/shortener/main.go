@@ -76,6 +76,7 @@ func main() {
 	service := service.ShortenService{
 		Storage: storage,
 		EP:      *ep,
+		Logger:  logger,
 	}
 
 	r := router.CreateRouter(cfg, &service, storage, logger)

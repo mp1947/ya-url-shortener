@@ -7,7 +7,7 @@ import (
 
 type Repository interface {
 	Init(cfg config.Config) error
-	Save(shortURL, originalURL string) (bool, error)
+	Save(shortURL, originalURL string) error
 	SaveBatch(urls []entity.URL) (bool, error)
 	Get(shortURL string) (string, error)
 	Ping() error
