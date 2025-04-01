@@ -10,10 +10,19 @@ func (s *Memory) Init() {
 	s.StorageType = "inmemory"
 }
 
-func (s *Memory) Save(shortURL, originalURL string) {
-	s.data[shortURL] = originalURL
+func (s *Memory) Save(shortURL, originalURL string) bool {
+	isSaved := false
+	if s.data[shortURL] == "" {
+		s.data[shortURL] = originalURL
+		isSaved = true
+	}
+	return isSaved
 }
 
 func (s *Memory) Get(shortURL string) string {
 	return s.data[shortURL]
+}
+
+func (s *Memory) GetType() string {
+	return s.StorageType
 }

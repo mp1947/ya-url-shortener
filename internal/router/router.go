@@ -19,6 +19,7 @@ func CreateRouter(
 
 	r.Use(gin.Recovery())
 	r.Use(middleware.LoggerMiddleware(l))
+	r.Use(middleware.GzipMiddleware())
 
 	h := handler.HandlerService{Service: s, Cfg: c}
 

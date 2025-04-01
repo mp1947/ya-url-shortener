@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/eventlog"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
@@ -23,9 +24,11 @@ const (
 
 var listenAddr = ":8080"
 var baseURL = "http://localhost:8080"
+var fileStoragePath = "./test.out"
 var cfg = config.Config{
-	ListenAddr: &listenAddr,
-	BaseURL:    &baseURL,
+	ListenAddr:      &listenAddr,
+	BaseURL:         &baseURL,
+	FileStoragePath: &fileStoragePath,
 }
 
 func TestShortenURL(t *testing.T) {
@@ -110,7 +113,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 	storage.Save(randomID, testURL)
 
 	service := service.ShortenService{Storage: storage}
-	h := HandlerService{Service: service}
+	h := HandlerService{Service: &service}
 
 	type request struct {
 		httpMethod    string
@@ -263,7 +266,13 @@ func initTestHandlerService() HandlerService {
 	storage := &inmemory.Memory{}
 	storage.Init()
 
-	service := service.ShortenService{Storage: storage}
+	ep, err := eventlog.NewEventProcessor(cfg)
 
-	return HandlerService{Service: service, Cfg: cfg}
+	if err != nil {
+		panic(err)
+	}
+
+	service := service.ShortenService{Storage: storage, EP: *ep}
+
+	return HandlerService{Service: &service, Cfg: cfg}
 }

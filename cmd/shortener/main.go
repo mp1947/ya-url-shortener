@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/eventlog"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/router"
@@ -23,6 +24,16 @@ func main() {
 
 	logger.Info("initializing web server")
 
+	logger.Info("parsing configuration parameters")
+	cfg := config.Config{}
+	cfg.InitConfig()
+
+	logger.Info(
+		"config has been initialized",
+		zap.String("host", *cfg.ListenAddr),
+		zap.String("base_url", *cfg.BaseURL),
+	)
+
 	logger.Info("creating and initializing storage")
 
 	storage := &inmemory.Memory{}
@@ -33,21 +44,30 @@ func main() {
 		zap.String("type", storage.StorageType),
 	)
 
-	logger.Info("creating shortener service")
+	ep, err := eventlog.NewEventProcessor(cfg)
 
-	service := service.ShortenService{Storage: storage}
-
-	logger.Info("parsing configuration parameters")
-	cfg := config.Config{}
-	cfg.ParseFlags()
+	if err != nil {
+		logger.Fatal("failed creating new event processor", zap.Error(err))
+	}
 
 	logger.Info(
-		"config has been initialized",
-		zap.String("host", *cfg.ListenAddr),
-		zap.String("base_url", *cfg.BaseURL),
+		"restoring records from file storage",
+		zap.String("file_storage_path", *cfg.FileStoragePath),
 	)
+	numRecordsRestored, err := ep.RestoreFromFile(cfg, storage, logger)
 
-	r := router.CreateRouter(cfg, service, logger)
+	if err != nil {
+		logger.Fatal("error loading data from file", zap.Error(err))
+	}
+
+	logger.Info("records restored", zap.Int("count", numRecordsRestored))
+
+	service := service.ShortenService{
+		Storage: storage,
+		EP:      *ep,
+	}
+
+	r := router.CreateRouter(cfg, &service, logger)
 
 	logger.Info(
 		"router has been created. web server is ready to start",
