@@ -12,7 +12,7 @@ import (
 )
 
 type Repository interface {
-	Init(cfg config.Config, ctx context.Context) error
+	Init(ctx context.Context, cfg config.Config, l *zap.Logger) error
 	Save(ctx context.Context, shortURLID, originalURL string) error
 	SaveBatch(ctx context.Context, urls []entity.URL) (bool, error)
 	Get(ctx context.Context, shortURL string) (string, error)
@@ -38,7 +38,7 @@ func CreateRepository(
 	case "inmemory":
 		l.Info("creating inmemory storage backend")
 		m := &inmemory.Memory{}
-		if err := m.Init(cfg, ctx); err != nil {
+		if err := m.Init(ctx, cfg, l); err != nil {
 			return nil, err
 		}
 		l.Info(
@@ -54,7 +54,7 @@ func CreateRepository(
 	case "database":
 		l.Info("creating database storage backend")
 		db := &database.Database{}
-		if err := db.Init(cfg, ctx); err != nil {
+		if err := db.Init(ctx, cfg, l); err != nil {
 			return nil, err
 		}
 		return db, nil

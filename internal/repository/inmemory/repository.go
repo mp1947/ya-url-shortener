@@ -22,7 +22,11 @@ type Memory struct {
 	StorageType     string
 }
 
-func (s *Memory) Init(cfg config.Config, ctx context.Context) error {
+func (s *Memory) Init(
+	ctx context.Context,
+	cfg config.Config,
+	l *zap.Logger,
+) error {
 	var err error
 
 	s.cfg = cfg

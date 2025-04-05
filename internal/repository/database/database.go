@@ -2,16 +2,23 @@ package database
 
 import (
 	"context"
+	"embed"
 	"errors"
 
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
+	"github.com/pressly/goose/v3"
+	"go.uber.org/zap"
 )
+
+//go:embed migrations/*.sql
+var embedMigrations embed.FS
 
 type Database struct {
 	conn        *pgxpool.Pool
@@ -19,7 +26,11 @@ type Database struct {
 	StorageType string
 }
 
-func (d *Database) Init(cfg config.Config, ctx context.Context) error {
+func (d *Database) Init(
+	ctx context.Context,
+	cfg config.Config,
+	l *zap.Logger,
+) error {
 	var err error
 	d.cfg = cfg
 	pgConfig, err := pgxpool.ParseConfig(*d.cfg.DatabaseDSN)
@@ -37,13 +48,17 @@ func (d *Database) Init(cfg config.Config, ctx context.Context) error {
 		return err
 	}
 
-	_, err = d.conn.Exec(ctx, createTableQuery)
-	if err != nil {
+	goose.SetBaseFS(embedMigrations)
+	goose.SetLogger(goose.NopLogger())
+
+	if err := goose.SetDialect("postgres"); err != nil {
 		return err
 	}
 
-	_, err = d.conn.Exec(ctx, createIndexQuery)
-	if err != nil {
+	db := stdlib.OpenDBFromPool(d.conn)
+	defer db.Close()
+
+	if err := goose.Up(db, "migrations"); err != nil {
 		return err
 	}
 

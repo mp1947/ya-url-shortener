@@ -33,7 +33,8 @@ var cfg = config.Config{
 	FileStoragePath: &fileStoragePath,
 }
 var storage = &inmemory.Memory{}
-var storageInitializedErr = storage.Init(cfg, context.Background())
+var l, _ = logger.InitLogger()
+var storageInitializedErr = storage.Init(context.Background(), cfg, l)
 var hs = initTestHandlerService()
 
 func TestShortenURL(t *testing.T) {
@@ -264,9 +265,7 @@ func initTestHandlerService() HandlerService {
 		log.Fatalf("error initializing storage: %v", storageInitializedErr)
 	}
 
-	logger, _ := logger.InitLogger()
-
-	service := service.ShortenService{Storage: storage, Logger: logger}
+	service := service.ShortenService{Storage: storage, Logger: l}
 
 	return HandlerService{Service: &service, Cfg: cfg}
 }
