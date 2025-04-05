@@ -11,7 +11,6 @@ import (
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
-	"go.uber.org/zap"
 )
 
 type Database struct {
@@ -33,6 +32,11 @@ func (d *Database) Init(cfg config.Config, ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	if err := d.conn.Ping(ctx); err != nil {
+		return err
+	}
+
 	_, err = d.conn.Exec(ctx, createTableQuery)
 	if err != nil {
 		return err
@@ -80,7 +84,9 @@ func (d *Database) SaveBatch(ctx context.Context, urls []entity.URL) (bool, erro
 		}
 		_, err := tx.Exec(ctx, insertShortURLQuery, args)
 		if err != nil {
-			tx.Rollback(ctx)
+			if rbErr := tx.Rollback(ctx); rbErr != nil {
+				return false, rbErr
+			}
 			return false, err
 		}
 	}
@@ -117,9 +123,4 @@ func (d *Database) Close() {
 
 func (d *Database) Ping(ctx context.Context) error {
 	return d.conn.Ping(ctx)
-}
-
-func (d *Database) RestoreFromFile(l *zap.Logger) (int, error) {
-	// placeholder method to satisfy interface
-	return 0, nil
 }

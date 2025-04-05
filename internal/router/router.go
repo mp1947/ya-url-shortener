@@ -6,6 +6,7 @@ import (
 	"github.com/mp1947/ya-url-shortener/internal/handler"
 	"github.com/mp1947/ya-url-shortener/internal/middleware"
 	"github.com/mp1947/ya-url-shortener/internal/repository"
+	"github.com/mp1947/ya-url-shortener/internal/repository/database"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"go.uber.org/zap"
 )
@@ -23,11 +24,14 @@ func CreateRouter(
 	r.Use(middleware.LoggerMiddleware(l))
 	r.Use(middleware.GzipMiddleware())
 
-	h := handler.HandlerService{Service: s, Cfg: c, Storage: repo}
+	h := handler.HandlerService{Service: s, Cfg: c}
 
 	r.Any("/", h.ShortenURL)
 	r.Any("/:id", h.GetOriginalURLByID)
-	r.GET("/ping", h.Ping)
+
+	if repo.GetType() == "database" {
+		r.GET("/ping", h.Ping(repo.(*database.Database)))
+	}
 
 	api := r.Group("/api")
 	api.POST("/shorten", h.JSONShortenURL)

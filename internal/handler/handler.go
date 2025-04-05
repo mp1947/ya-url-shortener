@@ -10,7 +10,7 @@ import (
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
-	"github.com/mp1947/ya-url-shortener/internal/repository"
+	"github.com/mp1947/ya-url-shortener/internal/repository/database"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 )
 
@@ -23,7 +23,6 @@ const (
 type HandlerService struct {
 	Service service.Service
 	Cfg     config.Config
-	Storage repository.Repository
 }
 
 func (s HandlerService) ShortenURL(c *gin.Context) {
@@ -120,13 +119,15 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 
 }
 
-func (s HandlerService) Ping(c *gin.Context) {
-	err := s.Storage.Ping(c.Request.Context())
-	if err != nil {
-		c.Status(http.StatusInternalServerError)
-		return
+func (s HandlerService) Ping(db *database.Database) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := db.Ping(c.Request.Context())
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		c.Status(http.StatusOK)
 	}
-	c.Status(http.StatusOK)
 }
 
 func (s HandlerService) BatchShortenURL(c *gin.Context) {

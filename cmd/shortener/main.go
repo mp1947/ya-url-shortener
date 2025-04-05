@@ -8,7 +8,6 @@ import (
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
-	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/router"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"go.uber.org/zap"
@@ -36,39 +35,21 @@ func main() {
 		zap.String("base_url", *cfg.BaseURL),
 	)
 
-	logger.Info("initializing storage backend")
+	storage, err := repository.CreateRepository(logger, cfg, ctx)
 
-	var storage repository.Repository
-
-	if *cfg.DatabaseDSN != "" {
-		storage = &database.Database{}
-	} else {
-		storage = &inmemory.Memory{}
-	}
-
-	if err := storage.Init(cfg, ctx); err != nil {
-		log.Fatal("error initializing storage backend", zap.Error(err))
-	}
-
-	switch storage.GetType() {
-	case "inmemory":
-		logger.Info(
-			"restoring records from file storage",
-			zap.String("file_storage_path", *cfg.FileStoragePath),
-		)
-		numRecordsRestored, err := storage.RestoreFromFile(logger)
-		if err != nil {
-			logger.Fatal("error loading data from file", zap.Error(err))
-		}
-		logger.Info("records restored", zap.Int("count", numRecordsRestored))
-	case "database":
-		logger.Info("no needed to restore from file for database storage backend")
+	if err != nil {
+		logger.Fatal("error creating repository", zap.Error(err))
 	}
 
 	logger.Info(
 		"storage has been initialized",
 		zap.String("type", storage.GetType()),
 	)
+
+	switch storage.GetType() {
+	case "database":
+		defer storage.(*database.Database).Close()
+	}
 
 	service := service.ShortenService{
 		Storage: storage,

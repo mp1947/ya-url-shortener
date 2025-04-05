@@ -70,11 +70,6 @@ func (s *Memory) GetType() string {
 	return s.StorageType
 }
 
-func (s *Memory) Ping(ctx context.Context) error {
-	// placeholder method to satisfy interface
-	return nil
-}
-
 func (s *Memory) RestoreFromFile(l *zap.Logger) (int, error) {
 	file, err := os.OpenFile(*s.cfg.FileStoragePath, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
