@@ -7,7 +7,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/google/uuid"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
@@ -118,6 +117,6 @@ func (s *Memory) RestoreFromFile(l *zap.Logger) (int, error) {
 	return currentUUID, nil
 }
 
-func (s *Memory) GetURLsByUserID(ctx context.Context, userID uuid.UUID) ([]entity.UserURL, error) {
+func (s *Memory) GetURLsByUserID(ctx context.Context, userID string) ([]entity.UserURL, error) {
 	return nil, nil
 }

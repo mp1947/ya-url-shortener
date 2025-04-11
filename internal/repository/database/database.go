@@ -5,7 +5,6 @@ import (
 	"embed"
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -139,7 +138,7 @@ func (d *Database) Get(ctx context.Context, shortURL string) (string, error) {
 	return shortURLFromDB, nil
 }
 
-func (d *Database) GetURLsByUserID(ctx context.Context, userID uuid.UUID) ([]entity.UserURL, error) {
+func (d *Database) GetURLsByUserID(ctx context.Context, userID string) ([]entity.UserURL, error) {
 
 	args := pgx.NamedArgs{
 		"userID": userID,

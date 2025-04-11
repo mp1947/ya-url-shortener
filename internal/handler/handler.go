@@ -191,16 +191,14 @@ func (s HandlerService) BatchShortenURL(c *gin.Context) {
 
 func (s HandlerService) GetUserURLS(c *gin.Context) {
 
-	userID, _ := c.Get("user_id")
+	userID, exists := c.Get("user_id")
 
-	userUUID, err := uuid.Parse(fmt.Sprintf("%s", userID))
-
-	if err != nil {
-		c.Status(http.StatusBadRequest)
+	if !exists {
+		c.Status(http.StatusUnauthorized)
 		return
 	}
 
-	resp, err := s.Service.GetUserURLs(c.Request.Context(), s.Cfg, userUUID)
+	resp, err := s.Service.GetUserURLs(c.Request.Context(), s.Cfg, fmt.Sprintf("%s", userID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "internal server error while processing urls",

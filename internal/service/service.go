@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
@@ -33,7 +32,7 @@ type Service interface {
 	GetUserURLs(
 		ctx context.Context,
 		cfg config.Config,
-		userUUID uuid.UUID,
+		userID string,
 	) ([]dto.ShortenURLsByUserID, error)
 }
 
@@ -137,14 +136,14 @@ func (s *ShortenService) GetOriginalURL(
 func (s *ShortenService) GetUserURLs(
 	ctx context.Context,
 	cfg config.Config,
-	userUUID uuid.UUID,
+	userID string,
 ) ([]dto.ShortenURLsByUserID, error) {
 	s.Logger.Info(
 		"processing shorten urls from storage for user",
-		zap.String("user_id", userUUID.String()),
+		zap.String("user_id", userID),
 	)
 
-	userURLs, err := s.Storage.GetURLsByUserID(ctx, userUUID)
+	userURLs, err := s.Storage.GetURLsByUserID(ctx, userID)
 
 	if err != nil {
 		s.Logger.Warn("error getting urls by user id", zap.Error(err))
