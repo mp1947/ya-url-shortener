@@ -191,12 +191,7 @@ func (s HandlerService) BatchShortenURL(c *gin.Context) {
 
 func (s HandlerService) GetUserURLS(c *gin.Context) {
 
-	userID, exists := c.Get("user_id")
-
-	if !exists {
-		c.Data(http.StatusOK, contentTypeJSON, nil)
-		return
-	}
+	userID, _ := c.Get("user_id")
 
 	userUUID, err := uuid.Parse(fmt.Sprintf("%s", userID))
 
