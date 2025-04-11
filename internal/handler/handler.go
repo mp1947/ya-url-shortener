@@ -212,7 +212,7 @@ func (s HandlerService) GetUserURLS(c *gin.Context) {
 	}
 
 	if len(resp) < 1 {
-		c.Status(http.StatusNoContent)
+		c.JSON(http.StatusNoContent, nil)
 		return
 	}
 	c.JSON(http.StatusOK, resp)
