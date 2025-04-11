@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/auth"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
@@ -160,10 +161,10 @@ func (s HandlerService) BatchShortenURL(c *gin.Context) {
 }
 
 func (s HandlerService) GetUserURLS(c *gin.Context) {
-	tokenCookie, err := c.Cookie("token")
-	ok, userID := auth.Validate(tokenCookie)
+	tokenCookie, _ := c.Cookie("token")
+	_, userID := auth.Validate(tokenCookie)
 
-	if errors.Is(err, http.ErrNoCookie) || !ok {
+	if userID != uuid.Nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "unauthorized",
 		})
