@@ -42,6 +42,7 @@ func Validate(tokenString string) (bool, uuid.UUID) {
 			return secretKey, nil
 		})
 	if err != nil {
+		fmt.Println(err)
 		return false, uuid.Nil
 	}
 
