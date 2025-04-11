@@ -193,10 +193,7 @@ func (s HandlerService) GetUserURLS(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "unauthorized",
-		})
-		return
+		userID = uuid.New().String()
 	}
 
 	userUUID, err := uuid.Parse(fmt.Sprintf("%s", userID))
