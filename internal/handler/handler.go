@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	contentType       = "text/plain; charset=utf-8"
+	contentTypePlain  = "text/plain; charset=utf-8"
+	contentTypeJSON   = "application/json; charset=utf-8"
 	requestBindingErr = "invalid request: error parsing request params"
 	requestBodyGetErr = "error getting request body"
 )
@@ -36,14 +37,14 @@ func (s HandlerService) ShortenURL(c *gin.Context) {
 	}
 
 	if c.Request.Method != http.MethodPost {
-		c.Data(http.StatusBadRequest, contentType, nil)
+		c.Data(http.StatusBadRequest, contentTypePlain, nil)
 		return
 	}
 
 	body, err := io.ReadAll(c.Request.Body)
 
 	if err != nil || string(body) == "" {
-		c.Data(http.StatusBadRequest, contentType, nil)
+		c.Data(http.StatusBadRequest, contentTypePlain, nil)
 		return
 	}
 
@@ -55,24 +56,24 @@ func (s HandlerService) ShortenURL(c *gin.Context) {
 	)
 
 	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
-		c.Data(http.StatusConflict, contentType, []byte(shortURL))
+		c.Data(http.StatusConflict, contentTypePlain, []byte(shortURL))
 		return
 	} else if err != nil {
 		c.Data(
 			http.StatusInternalServerError,
-			contentType,
+			contentTypePlain,
 			[]byte("internal server error while shorten url"),
 		)
 		return
 	}
 
-	c.Data(http.StatusCreated, contentType, []byte(shortURL))
+	c.Data(http.StatusCreated, contentTypePlain, []byte(shortURL))
 
 }
 
 func (s HandlerService) GetOriginalURLByID(c *gin.Context) {
 	if c.Request.Method != http.MethodGet {
-		c.Data(http.StatusBadRequest, contentType, nil)
+		c.Data(http.StatusBadRequest, contentTypePlain, nil)
 		return
 	}
 
@@ -85,10 +86,10 @@ func (s HandlerService) GetOriginalURLByID(c *gin.Context) {
 	}
 	if originalURL != "" {
 		c.Header("Location", originalURL)
-		c.Data(http.StatusTemporaryRedirect, contentType, nil)
+		c.Data(http.StatusTemporaryRedirect, contentTypePlain, nil)
 		return
 	}
-	c.Data(http.StatusBadRequest, contentType, nil)
+	c.Data(http.StatusBadRequest, contentTypePlain, nil)
 }
 
 func (s HandlerService) JSONShortenURL(c *gin.Context) {
@@ -193,7 +194,8 @@ func (s HandlerService) GetUserURLS(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 
 	if !exists {
-		userID = uuid.New().String()
+		c.Data(http.StatusOK, contentTypeJSON, nil)
+		return
 	}
 
 	userUUID, err := uuid.Parse(fmt.Sprintf("%s", userID))
