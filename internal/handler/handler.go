@@ -3,13 +3,13 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/auth"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
@@ -29,6 +29,12 @@ type HandlerService struct {
 
 func (s HandlerService) ShortenURL(c *gin.Context) {
 
+	userID, exists := c.Get("user_id")
+
+	if !exists {
+		userID = uuid.New().String()
+	}
+
 	if c.Request.Method != http.MethodPost {
 		c.Data(http.StatusBadRequest, contentType, nil)
 		return
@@ -41,7 +47,12 @@ func (s HandlerService) ShortenURL(c *gin.Context) {
 		return
 	}
 
-	shortURL, err := s.Service.ShortenURL(c.Request.Context(), s.Cfg, string(body))
+	shortURL, err := s.Service.ShortenURL(
+		c.Request.Context(),
+		s.Cfg,
+		string(body),
+		fmt.Sprintf("%s", userID),
+	)
 
 	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
 		c.Data(http.StatusConflict, contentType, []byte(shortURL))
@@ -84,6 +95,12 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 	var request dto.ShortenRequest
 	rawRequest, err := c.GetRawData()
 
+	userID, exists := c.Get("user_id")
+
+	if !exists {
+		userID = uuid.New().String()
+	}
+
 	if err != nil {
 		c.JSON(
 			http.StatusBadRequest,
@@ -105,6 +122,7 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 		c.Request.Context(),
 		s.Cfg,
 		string(request.URL),
+		fmt.Sprintf("%s", userID),
 	)
 
 	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
@@ -134,6 +152,11 @@ func (s HandlerService) Ping(db *database.Database) gin.HandlerFunc {
 
 func (s HandlerService) BatchShortenURL(c *gin.Context) {
 	var batchRequestData []dto.BatchShortenRequest
+	userID, exists := c.Get("user_id")
+
+	if !exists {
+		userID = uuid.New().String()
+	}
 	if err := c.ShouldBindJSON(&batchRequestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "incorrect request body (error json binding)",
@@ -148,7 +171,12 @@ func (s HandlerService) BatchShortenURL(c *gin.Context) {
 		return
 	}
 
-	data, err := s.Service.ShortenURLBatch(c.Request.Context(), s.Cfg, batchRequestData)
+	data, err := s.Service.ShortenURLBatch(
+		c.Request.Context(),
+		s.Cfg,
+		batchRequestData,
+		fmt.Sprintf("%s", userID),
+	)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -161,16 +189,24 @@ func (s HandlerService) BatchShortenURL(c *gin.Context) {
 }
 
 func (s HandlerService) GetUserURLS(c *gin.Context) {
-	tokenCookie, _ := c.Cookie("token")
-	_, userID := auth.Validate(tokenCookie)
 
-	if userID != uuid.Nil {
+	userID, exists := c.Get("user_id")
+
+	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "unauthorized",
 		})
 		return
 	}
-	resp, err := s.Service.GetUserURLs(c.Request.Context(), s.Cfg, userID)
+
+	userUUID, err := uuid.Parse(fmt.Sprintf("%s", userID))
+
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	resp, err := s.Service.GetUserURLs(c.Request.Context(), s.Cfg, userUUID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "internal server error while processing urls",

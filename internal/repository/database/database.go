@@ -66,11 +66,16 @@ func (d *Database) Init(
 	d.StorageType = "database"
 	return nil
 }
-func (d *Database) Save(ctx context.Context, shortURLID, originalURL string) error {
+func (d *Database) Save(
+	ctx context.Context,
+	shortURLID, originalURL string,
+	userID string,
+) error {
 
 	args := pgx.NamedArgs{
 		"shortURL":    shortURLID,
 		"originalURL": originalURL,
+		"userID":      userID,
 	}
 
 	_, err := d.conn.Exec(ctx, insertShortURLQuery, args)
@@ -87,7 +92,11 @@ func (d *Database) Save(ctx context.Context, shortURLID, originalURL string) err
 	return nil
 }
 
-func (d *Database) SaveBatch(ctx context.Context, urls []entity.URLWithCorrelation) (bool, error) {
+func (d *Database) SaveBatch(
+	ctx context.Context,
+	urls []entity.URLWithCorrelation,
+	userID string,
+) (bool, error) {
 	tx, err := d.conn.Begin(ctx)
 	if err != nil {
 		return false, err
@@ -97,6 +106,7 @@ func (d *Database) SaveBatch(ctx context.Context, urls []entity.URLWithCorrelati
 		args := pgx.NamedArgs{
 			"shortURL":    v.ShortURLID,
 			"originalURL": v.OriginalURL,
+			"userID":      userID,
 		}
 		_, err := tx.Exec(ctx, insertShortURLQuery, args)
 		if err != nil {

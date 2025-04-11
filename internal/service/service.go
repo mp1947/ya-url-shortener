@@ -17,12 +17,18 @@ import (
 )
 
 type Service interface {
-	ShortenURL(ctx context.Context, cfg config.Config, url string) (string, error)
+	ShortenURL(
+		ctx context.Context,
+		cfg config.Config,
+		url string,
+		userID string,
+	) (string, error)
 	GetOriginalURL(ctx context.Context, shortURLID string) (string, error)
 	ShortenURLBatch(
 		ctx context.Context,
 		cfg config.Config,
 		batchData []dto.BatchShortenRequest,
+		userID string,
 	) ([]dto.BatchShortenResponse, error)
 	GetUserURLs(
 		ctx context.Context,
@@ -41,6 +47,7 @@ func (s *ShortenService) ShortenURL(
 	ctx context.Context,
 	cfg config.Config,
 	url string,
+	userID string,
 ) (string, error) {
 	s.Logger.Info("shortening incoming url", zap.String("original_url", url))
 
@@ -50,9 +57,10 @@ func (s *ShortenService) ShortenURL(
 		"short_url id generated for url",
 		zap.String("short_url_id", shortURLID),
 		zap.String("original_url", url),
+		zap.String("user_id", userID),
 	)
 
-	err := s.Storage.Save(ctx, shortURLID, url)
+	err := s.Storage.Save(ctx, shortURLID, url, userID)
 	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {
 		s.Logger.Info(
 			"original_url already exists, returning error with short url",
@@ -72,6 +80,7 @@ func (s *ShortenService) ShortenURLBatch(
 	ctx context.Context,
 	cfg config.Config,
 	batchData []dto.BatchShortenRequest,
+	userID string,
 ) ([]dto.BatchShortenResponse, error) {
 	s.Logger.Info(
 		"processing batch of urls",
@@ -94,7 +103,7 @@ func (s *ShortenService) ShortenURLBatch(
 		}
 	}
 
-	_, err := s.Storage.SaveBatch(ctx, urls)
+	_, err := s.Storage.SaveBatch(ctx, urls, userID)
 	if err != nil {
 		s.Logger.Warn("error while saving batch of urls", zap.Error(err))
 		return nil, err

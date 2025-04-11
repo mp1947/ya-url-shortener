@@ -42,7 +42,12 @@ func (s *Memory) Init(
 	return nil
 }
 
-func (s *Memory) Save(ctx context.Context, shortURLID, originalURL string) error {
+func (s *Memory) Save(
+	ctx context.Context,
+	shortURLID,
+	originalURL string,
+	userID string,
+) error {
 	if s.data[shortURLID] == "" {
 		s.data[shortURLID] = originalURL
 
@@ -51,6 +56,7 @@ func (s *Memory) Save(ctx context.Context, shortURLID, originalURL string) error
 			UUID:        strconv.Itoa(s.EP.CurrentUUID),
 			ShortURL:    shortURLID,
 			OriginalURL: originalURL,
+			UserID:      userID,
 		}
 		if !s.isInRestoreMode {
 			s.EP.WriteEvent(&event)
@@ -60,7 +66,11 @@ func (s *Memory) Save(ctx context.Context, shortURLID, originalURL string) error
 	return shrterr.ErrOriginalURLAlreadyExists
 }
 
-func (s *Memory) SaveBatch(ctx context.Context, urls []entity.URLWithCorrelation) (bool, error) {
+func (s *Memory) SaveBatch(
+	ctx context.Context,
+	urls []entity.URLWithCorrelation,
+	userID string,
+) (bool, error) {
 	for _, v := range urls {
 		s.data[v.ShortURLID] = v.OriginalURL
 	}
@@ -96,7 +106,7 @@ func (s *Memory) RestoreFromFile(l *zap.Logger) (int, error) {
 		if err := json.Unmarshal([]byte(line), &event); err != nil {
 			return 0, err
 		}
-		if err := s.Save(ctx, event.ShortURL, event.OriginalURL); err != nil {
+		if err := s.Save(ctx, event.ShortURL, event.OriginalURL, event.UserID); err != nil {
 			l.Warn("error saving record to file during restore phase", zap.Error(err))
 		}
 

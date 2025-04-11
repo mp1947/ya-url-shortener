@@ -14,8 +14,8 @@ import (
 
 type Repository interface {
 	Init(ctx context.Context, cfg config.Config, l *zap.Logger) error
-	Save(ctx context.Context, shortURLID, originalURL string) error
-	SaveBatch(ctx context.Context, urls []entity.URLWithCorrelation) (bool, error)
+	Save(ctx context.Context, shortURLID, originalURL string, userID string) error
+	SaveBatch(ctx context.Context, urls []entity.URLWithCorrelation, userID string) (bool, error)
 	Get(ctx context.Context, shortURL string) (string, error)
 	GetURLsByUserID(ctx context.Context, userID uuid.UUID) ([]entity.UserURL, error)
 	GetType() string

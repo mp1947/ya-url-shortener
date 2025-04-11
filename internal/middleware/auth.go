@@ -26,9 +26,9 @@ func AuthMiddleware(log *zap.Logger) gin.HandlerFunc {
 			c.Next()
 			return
 		}
-
-		log.Info("request from user", zap.String("user_id", userID.String()))
-
+		userIDStr := userID.String()
+		log.Info("request from user", zap.String("user_id", userIDStr))
+		c.Set("user_id", userIDStr)
 		c.Next()
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
@@ -113,7 +114,9 @@ func TestGetOriginalURLByID(t *testing.T) {
 
 	randomID := usecase.GenerateIDFromURL(testURL)
 
-	storage.Save(context.TODO(), randomID, testURL)
+	userID := uuid.New().String()
+
+	storage.Save(context.TODO(), randomID, testURL, userID)
 
 	type request struct {
 		httpMethod    string
