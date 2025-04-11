@@ -24,7 +24,11 @@ type Service interface {
 		cfg config.Config,
 		batchData []dto.BatchShortenRequest,
 	) ([]dto.BatchShortenResponse, error)
-	GetUserURLs(ctx context.Context, userUUID uuid.UUID) ([]dto.ShortenURLsByUserID, error)
+	GetUserURLs(
+		ctx context.Context,
+		cfg config.Config,
+		userUUID uuid.UUID,
+	) ([]dto.ShortenURLsByUserID, error)
 }
 
 type ShortenService struct {
@@ -123,6 +127,7 @@ func (s *ShortenService) GetOriginalURL(
 
 func (s *ShortenService) GetUserURLs(
 	ctx context.Context,
+	cfg config.Config,
 	userUUID uuid.UUID,
 ) ([]dto.ShortenURLsByUserID, error) {
 	s.Logger.Info(
@@ -141,7 +146,7 @@ func (s *ShortenService) GetUserURLs(
 
 	for i, v := range userURLs {
 		userURLsResponse[i] = dto.ShortenURLsByUserID{
-			ShortURL:    v.ShortURLID,
+			ShortURL:    generateShortURL(*cfg.BaseURL, v.ShortURLID),
 			OriginalURL: v.OriginalURL,
 		}
 	}

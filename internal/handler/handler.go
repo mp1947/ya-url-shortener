@@ -169,7 +169,7 @@ func (s HandlerService) GetUserURLS(c *gin.Context) {
 		})
 		return
 	}
-	resp, err := s.Service.GetUserURLs(c.Request.Context(), userID)
+	resp, err := s.Service.GetUserURLs(c.Request.Context(), s.Cfg, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "internal server error while processing urls",
