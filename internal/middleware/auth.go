@@ -15,6 +15,8 @@ func AuthMiddleware(log *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenCookie, err := c.Cookie("token")
 
+		log.Info("print all cookies", zap.Any("cookies", c.Request.Cookies()))
+
 		ok, userID := auth.Validate(tokenCookie)
 
 		if errors.Is(err, http.ErrNoCookie) || !ok {
