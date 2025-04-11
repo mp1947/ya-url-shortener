@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/auth"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
@@ -156,4 +157,29 @@ func (s HandlerService) BatchShortenURL(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, data)
+}
+
+func (s HandlerService) GetUserURLS(c *gin.Context) {
+	tokenCookie, err := c.Cookie("token")
+	ok, userID := auth.Validate(tokenCookie)
+
+	if errors.Is(err, http.ErrNoCookie) || !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "unauthorized",
+		})
+		return
+	}
+	resp, err := s.Service.GetUserURLs(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "internal server error while processing urls",
+		})
+		return
+	}
+
+	if len(resp) < 1 {
+		c.Status(http.StatusNoContent)
+		return
+	}
+	c.JSON(http.StatusOK, resp)
 }

@@ -5,6 +5,7 @@ import (
 	"embed"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -86,7 +87,7 @@ func (d *Database) Save(ctx context.Context, shortURLID, originalURL string) err
 	return nil
 }
 
-func (d *Database) SaveBatch(ctx context.Context, urls []entity.URL) (bool, error) {
+func (d *Database) SaveBatch(ctx context.Context, urls []entity.URLWithCorrelation) (bool, error) {
 	tx, err := d.conn.Begin(ctx)
 	if err != nil {
 		return false, err
@@ -126,6 +127,41 @@ func (d *Database) Get(ctx context.Context, shortURL string) (string, error) {
 		return "", err
 	}
 	return shortURLFromDB, nil
+}
+
+func (d *Database) GetURLsByUserID(ctx context.Context, userID uuid.UUID) ([]entity.UserURL, error) {
+
+	args := pgx.NamedArgs{
+		"userID": userID,
+	}
+
+	rows, err := d.conn.Query(ctx, getURLsByUserID, args)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	UserURL := make([]entity.UserURL, len(rows.RawValues()))
+
+	for rows.Next() {
+		var originalURL, shortURL string
+
+		err := rows.Scan(&originalURL, &shortURL)
+
+		if err != nil {
+			return nil, err
+		}
+		UserURL = append(UserURL, entity.UserURL{
+			ShortURLID:  shortURL,
+			OriginalURL: originalURL,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return UserURL, nil
 }
 
 func (d *Database) GetType() string {

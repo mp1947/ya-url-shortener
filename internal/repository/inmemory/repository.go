@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
@@ -59,7 +60,7 @@ func (s *Memory) Save(ctx context.Context, shortURLID, originalURL string) error
 	return shrterr.ErrOriginalURLAlreadyExists
 }
 
-func (s *Memory) SaveBatch(ctx context.Context, urls []entity.URL) (bool, error) {
+func (s *Memory) SaveBatch(ctx context.Context, urls []entity.URLWithCorrelation) (bool, error) {
 	for _, v := range urls {
 		s.data[v.ShortURLID] = v.OriginalURL
 	}
@@ -105,4 +106,8 @@ func (s *Memory) RestoreFromFile(l *zap.Logger) (int, error) {
 	s.isInRestoreMode = false
 
 	return currentUUID, nil
+}
+
+func (s *Memory) GetURLsByUserID(ctx context.Context, userID uuid.UUID) ([]entity.UserURL, error) {
+	return nil, nil
 }

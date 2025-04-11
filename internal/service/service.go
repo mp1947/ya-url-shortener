@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
@@ -23,6 +24,7 @@ type Service interface {
 		cfg config.Config,
 		batchData []dto.BatchShortenRequest,
 	) ([]dto.BatchShortenResponse, error)
+	GetUserURLs(ctx context.Context, userUUID uuid.UUID) ([]dto.ShortenURLsByUserID, error)
 }
 
 type ShortenService struct {
@@ -72,12 +74,12 @@ func (s *ShortenService) ShortenURLBatch(
 		zap.Any("batch_data", batchData),
 	)
 
-	urls := make([]entity.URL, len(batchData))
+	urls := make([]entity.URLWithCorrelation, len(batchData))
 	result := make([]dto.BatchShortenResponse, len(batchData))
 
 	for i, v := range batchData {
 		shortURLID := usecase.GenerateIDFromURL(v.OriginalURL)
-		urls[i] = entity.URL{
+		urls[i] = entity.URLWithCorrelation{
 			ShortURLID:    shortURLID,
 			OriginalURL:   v.OriginalURL,
 			CorrelationID: v.CorrelationID,
@@ -117,6 +119,33 @@ func (s *ShortenService) GetOriginalURL(
 		zap.String("original_url", data),
 	)
 	return data, nil
+}
+
+func (s *ShortenService) GetUserURLs(
+	ctx context.Context,
+	userUUID uuid.UUID,
+) ([]dto.ShortenURLsByUserID, error) {
+	s.Logger.Info(
+		"processing shorten urls from storage for user",
+		zap.String("user_id", userUUID.String()),
+	)
+
+	userURLs, err := s.Storage.GetURLsByUserID(ctx, userUUID)
+
+	if err != nil {
+		s.Logger.Warn("error getting urls by user id", zap.Error(err))
+		return nil, err
+	}
+
+	userURLsResponse := make([]dto.ShortenURLsByUserID, len(userURLs))
+
+	for i, v := range userURLs {
+		userURLsResponse[i] = dto.ShortenURLsByUserID{
+			ShortURL:    v.ShortURLID,
+			OriginalURL: v.OriginalURL,
+		}
+	}
+	return userURLsResponse, nil
 }
 
 func generateShortURL(baseURL, shortURLID string) string {

@@ -1,7 +1,12 @@
 package entity
 
-type URL struct {
+type URLWithCorrelation struct {
 	ShortURLID    string
 	OriginalURL   string
 	CorrelationID string
+}
+
+type UserURL struct {
+	ShortURLID  string
+	OriginalURL string
 }

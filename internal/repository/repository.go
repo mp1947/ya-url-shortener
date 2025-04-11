@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
@@ -14,8 +15,9 @@ import (
 type Repository interface {
 	Init(ctx context.Context, cfg config.Config, l *zap.Logger) error
 	Save(ctx context.Context, shortURLID, originalURL string) error
-	SaveBatch(ctx context.Context, urls []entity.URL) (bool, error)
+	SaveBatch(ctx context.Context, urls []entity.URLWithCorrelation) (bool, error)
 	Get(ctx context.Context, shortURL string) (string, error)
+	GetURLsByUserID(ctx context.Context, userID uuid.UUID) ([]entity.UserURL, error)
 	GetType() string
 }
 
