@@ -15,7 +15,7 @@ type Claims struct {
 
 var secretKey = []byte(os.Getenv("SECRET_KEY"))
 
-func CreateCookie(userID uuid.UUID) (string, error) {
+func CreateToken(userID uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		UserID: userID,
 	})

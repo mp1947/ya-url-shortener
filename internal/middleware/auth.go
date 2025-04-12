@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http/httputil"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -23,11 +24,12 @@ func AuthMiddleware(log *zap.Logger) gin.HandlerFunc {
 
 		if token == "" || !ok {
 			generatedUserID := uuid.New()
-			newCookie, err := auth.CreateCookie(generatedUserID)
+			token, err := auth.CreateToken(generatedUserID)
 			if err != nil {
 				log.Warn("error creating new cookie", zap.Error(err))
 			}
-			c.Header("Authorization", newCookie)
+			c.Header("Authorization", token)
+			c.SetCookie("Authorization", token, int(time.Second)*3600, "/", "*", true, true)
 			c.Set("user_id", generatedUserID.String())
 			c.Next()
 			return
