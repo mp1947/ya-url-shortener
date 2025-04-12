@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"net/http/httputil"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +12,6 @@ import (
 func AuthMiddleware(log *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
-
-		log.Info("print all cookies", zap.Any("cookies", c.Request.Cookies()))
-
-		rDump, _ := httputil.DumpRequest(c.Request, true)
-
-		log.Info("print request data", zap.Any("request data", string(rDump)))
 
 		ok, userID := auth.Validate(token)
 
