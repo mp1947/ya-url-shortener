@@ -139,7 +139,7 @@ func (s *ShortenService) GetUserURLs(
 	userID string,
 ) ([]dto.ShortenURLsByUserID, error) {
 	s.Logger.Info(
-		"processing shorten urls from storage for user",
+		"processing shorten urls for user",
 		zap.String("user_id", userID),
 	)
 

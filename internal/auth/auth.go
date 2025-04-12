@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
@@ -12,7 +13,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-var secretKey = []byte("secret-key")
+var secretKey = []byte(os.Getenv("SECRET_KEY"))
 
 func CreateCookie(userID uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
@@ -46,6 +47,7 @@ func Validate(tokenString string) (bool, uuid.UUID) {
 	}
 
 	if !token.Valid {
+		fmt.Println("token not valid")
 		return false, uuid.Nil
 	}
 

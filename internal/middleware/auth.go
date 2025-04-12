@@ -1,10 +1,7 @@
 package middleware
 
 import (
-	"errors"
-	"net/http"
 	"net/http/httputil"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -14,23 +11,23 @@ import (
 
 func AuthMiddleware(log *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenCookie, err := c.Cookie("token")
+		token := c.GetHeader("Authorization")
 
 		log.Info("print all cookies", zap.Any("cookies", c.Request.Cookies()))
 
 		rDump, _ := httputil.DumpRequest(c.Request, true)
 
-		log.Info("print all headers", zap.Any("request data", string(rDump)))
+		log.Info("print request data", zap.Any("request data", string(rDump)))
 
-		ok, userID := auth.Validate(tokenCookie)
+		ok, userID := auth.Validate(token)
 
-		if errors.Is(err, http.ErrNoCookie) || !ok {
+		if token == "" || !ok {
 			generatedUserID := uuid.New()
 			newCookie, err := auth.CreateCookie(generatedUserID)
 			if err != nil {
 				log.Warn("error creating new cookie", zap.Error(err))
 			}
-			c.SetCookie("token", newCookie, int(time.Second)*3600, "/", "*", true, true)
+			c.Header("Authorization", newCookie)
 			c.Set("user_id", generatedUserID.String())
 			c.Next()
 			return
