@@ -17,23 +17,26 @@ func AuthMiddleware(log *zap.Logger) gin.HandlerFunc {
 		tokenCookie, err := c.Cookie("token")
 
 		log.Info("print all cookies", zap.Any("cookies", c.Request.Cookies()))
-		rDump, _ := httputil.DumpRequest(c.Request, false)
 
-		log.Info("print all headers", zap.Any("headers", string(rDump)))
+		rDump, _ := httputil.DumpRequest(c.Request, true)
+
+		log.Info("print all headers", zap.Any("request data", string(rDump)))
 
 		ok, userID := auth.Validate(tokenCookie)
 
 		if errors.Is(err, http.ErrNoCookie) || !ok {
-			newCookie, err := auth.CreateCookie(uuid.New())
+			generatedUserID := uuid.New()
+			newCookie, err := auth.CreateCookie(generatedUserID)
 			if err != nil {
 				log.Warn("error creating new cookie", zap.Error(err))
 			}
 			c.SetCookie("token", newCookie, int(time.Second)*3600, "/", "*", true, true)
+			c.Set("user_id", generatedUserID.String())
 			c.Next()
 			return
 		}
 		userIDStr := userID.String()
-		log.Info("request from user", zap.String("user_id", userIDStr))
+		log.Info("processing request from user", zap.String("user_id", userIDStr))
 		c.Set("user_id", userIDStr)
 		c.Next()
 	}
