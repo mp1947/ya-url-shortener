@@ -56,6 +56,7 @@ func (s *Memory) Save(
 			ShortURL:    shortURLID,
 			OriginalURL: originalURL,
 			UserID:      userID,
+			IsDeleted:   false,
 		}
 		if !s.isInRestoreMode {
 			s.EP.WriteEvent(&event)
@@ -76,8 +77,20 @@ func (s *Memory) SaveBatch(
 	return true, nil
 }
 
-func (s *Memory) Get(ctx context.Context, shortURL string) (string, error) {
-	return s.data[shortURL], nil
+func (s *Memory) DeleteBatch(
+	ctx context.Context,
+	shortIDs []string,
+	userID string,
+) error {
+	return nil
+}
+
+func (s *Memory) Get(ctx context.Context, shortURL string) (entity.URL, error) {
+	return entity.URL{
+		OriginalURL: s.data[shortURL],
+		ShortURLID:  shortURL,
+		IsDeleted:   false,
+	}, nil
 }
 
 func (s *Memory) GetType() string {

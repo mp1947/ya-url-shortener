@@ -14,13 +14,19 @@ func (s HandlerService) GetOriginalURLByID(c *gin.Context) {
 
 	id := c.Param("id")
 
-	originalURL, err := s.Service.GetOriginalURL(c.Request.Context(), id)
+	url, err := s.Service.GetOriginalURL(c.Request.Context(), id)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	if originalURL != "" {
-		c.Header("Location", originalURL)
+
+	if url.IsDeleted {
+		c.Data(http.StatusGone, contentTypePlain, nil)
+		return
+	}
+
+	if url.OriginalURL != "" {
+		c.Header("Location", url.OriginalURL)
 		c.Data(http.StatusTemporaryRedirect, contentTypePlain, nil)
 		return
 	}

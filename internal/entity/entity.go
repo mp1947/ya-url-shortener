@@ -10,3 +10,9 @@ type UserURL struct {
 	ShortURLID  string
 	OriginalURL string
 }
+
+type URL struct {
+	ShortURLID  string
+	OriginalURL string
+	IsDeleted   bool
+}

@@ -39,6 +39,7 @@ func CreateRouter(
 	api.POST("/shorten/batch", h.BatchShortenURL)
 
 	api.GET("/user/urls", h.GetUserURLS)
+	api.DELETE("/user/urls", h.DeleteUserURLs)
 
 	return r
 }
