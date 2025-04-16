@@ -23,7 +23,7 @@ func (d *Database) DeleteBatch(
 	for _, v := range shortURLs.ShortURLs {
 		args := pgx.NamedArgs{
 			"shortURL": v,
-			// "userID":   shortURLs.UserID,
+			"userID":   shortURLs.UserID,
 		}
 		ct, err = tx.Exec(ctx, deleteURLQuery, args)
 		if err != nil {

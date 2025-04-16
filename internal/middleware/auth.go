@@ -37,7 +37,7 @@ func AuthMiddleware(log *zap.Logger) gin.HandlerFunc {
 				log.Warn("error creating new cookie", zap.Error(err))
 			}
 			c.Header("Authorization", token)
-			c.SetCookie("token", token, int(time.Second)*3600, "/", "localhost", true, true)
+			c.SetCookie("token", token, int(time.Second)*3600, "/", "localhost", false, false)
 			c.Set("user_id", generatedUserID.String())
 			c.Next()
 			return

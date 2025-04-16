@@ -11,6 +11,7 @@ func (s *ShortenService) DeleteURLsBatch(
 	ctx context.Context,
 	shortURLs entity.BatchDeleteShortURLs,
 ) error {
+	s.Logger.Info("putting into channel", zap.Any("data", shortURLs))
 	s.CommCh <- shortURLs
 	return nil
 }
