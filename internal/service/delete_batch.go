@@ -19,9 +19,14 @@ func (s *ShortenService) ProcessDeletions() {
 	s.Logger.Info("starting deletions processing goroutine")
 	for data := range s.CommCh {
 		s.Logger.Info("received new data for deletion", zap.Any("data", data))
-		if err := s.Storage.DeleteBatch(context.TODO(), data); err != nil {
+		rowsDeleted, err := s.Storage.DeleteBatch(data.Context, data)
+		if err != nil {
 			s.Logger.Warn("error batch-deleting short urls", zap.Error(err))
 		}
-		s.Logger.Info("data has been deleted from the database", zap.Any("data", data))
+		s.Logger.Info(
+			"data has been deleted from the database",
+			zap.Any("data", data),
+			zap.Int64("rows_deleted", rowsDeleted),
+		)
 	}
 }

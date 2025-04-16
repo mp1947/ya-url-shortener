@@ -37,6 +37,7 @@ func (s HandlerService) DeleteUserURLs(c *gin.Context) {
 		entity.BatchDeleteShortURLs{
 			ShortURLs: userURLsToDelete,
 			UserID:    fmt.Sprintf("%s", userID),
+			Context:   c.Request.Context(),
 		},
 	)
 

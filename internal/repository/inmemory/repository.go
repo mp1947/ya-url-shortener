@@ -80,8 +80,8 @@ func (s *Memory) SaveBatch(
 func (s *Memory) DeleteBatch(
 	ctx context.Context,
 	shortURLs entity.BatchDeleteShortURLs,
-) error {
-	return nil
+) (int64, error) {
+	return 0, nil
 }
 
 func (s *Memory) Get(ctx context.Context, shortURL string) (entity.URL, error) {

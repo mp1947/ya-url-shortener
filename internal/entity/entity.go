@@ -1,5 +1,7 @@
 package entity
 
+import "context"
+
 type URLWithCorrelation struct {
 	ShortURLID    string
 	OriginalURL   string
@@ -20,4 +22,5 @@ type URL struct {
 type BatchDeleteShortURLs struct {
 	ShortURLs []string
 	UserID    string
+	Context   context.Context
 }
