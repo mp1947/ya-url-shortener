@@ -7,6 +7,5 @@ const (
 	`
 	getOriginalURLByShortIDQuery = `SELECT original_url, is_deleted FROM urls where short_url = @shortURL`
 	getURLsByUserID              = `SELECT original_url, short_url FROM urls where user_uuid = @userID`
-	deleteURLQuery               = `UPDATE urls SET is_deleted = true WHERE short_url = @shortURL`
-	// deleteURLQuery               = `UPDATE urls SET is_deleted = true WHERE short_url = @shortURL AND user_uuid = @userID`
+	deleteURLQuery               = `UPDATE urls SET is_deleted = true WHERE short_url = @shortURL AND user_uuid = @userID`
 )
