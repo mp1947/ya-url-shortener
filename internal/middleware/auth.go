@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"errors"
-	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,24 +11,11 @@ import (
 
 func AuthMiddleware(log *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authToken := c.GetHeader("Authorization")
-		cookie, err := c.Cookie("token")
+		cookie, _ := c.Cookie("token")
 
-		var token string
+		ok, userID := auth.Validate(cookie)
 
-		isCookieExists := errors.Is(err, http.ErrNoCookie)
-
-		if isCookieExists && authToken != "" {
-			token = authToken
-			log.Info("auth token exists")
-		} else if !isCookieExists && authToken == "" {
-			token = cookie
-			log.Info("auth cookie exists")
-		}
-
-		ok, userID := auth.Validate(token)
-
-		if token == "" || !ok {
+		if !ok {
 			generatedUserID := uuid.New()
 			token, err := auth.CreateToken(generatedUserID)
 			if err != nil {
