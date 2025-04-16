@@ -16,3 +16,8 @@ type URL struct {
 	OriginalURL string
 	IsDeleted   bool
 }
+
+type BatchDeleteShortURLs struct {
+	ShortURLs []string
+	UserID    string
+}

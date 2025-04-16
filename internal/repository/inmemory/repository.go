@@ -79,8 +79,7 @@ func (s *Memory) SaveBatch(
 
 func (s *Memory) DeleteBatch(
 	ctx context.Context,
-	shortIDs []string,
-	userID string,
+	shortURLs entity.BatchDeleteShortURLs,
 ) error {
 	return nil
 }

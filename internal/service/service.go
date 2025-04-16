@@ -26,7 +26,7 @@ type Service interface {
 		batchData []dto.BatchShortenRequest,
 		userID string,
 	) ([]dto.BatchShortenResponse, error)
-	DeleteURLsBatch(ctx context.Context, shortURLs []string, userID string) error
+	DeleteURLsBatch(ctx context.Context, shortURLs entity.BatchDeleteShortURLs) error
 	GetUserURLs(
 		ctx context.Context,
 		cfg config.Config,
@@ -38,6 +38,7 @@ type ShortenService struct {
 	Storage repository.Repository
 	EP      eventlog.EventProcessor
 	Logger  *zap.Logger
+	CommCh  chan entity.BatchDeleteShortURLs
 }
 
 func generateShortURL(baseURL, shortURLID string) string {

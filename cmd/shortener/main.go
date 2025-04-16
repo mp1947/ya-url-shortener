@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/entity"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
@@ -54,7 +55,11 @@ func main() {
 	service := service.ShortenService{
 		Storage: storage,
 		Logger:  logger,
+		CommCh:  make(chan entity.BatchDeleteShortURLs),
 	}
+	defer close(service.CommCh)
+
+	go service.ProcessDeletions()
 
 	r := router.CreateRouter(cfg, &service, storage, logger)
 

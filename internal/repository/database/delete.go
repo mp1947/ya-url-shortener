@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/mp1947/ya-url-shortener/internal/entity"
 )
 
 func (d *Database) DeleteBatch(
 	ctx context.Context,
-	shortIDs []string,
-	userID string,
+	shortURLs entity.BatchDeleteShortURLs,
 ) error {
 
 	tx, err := d.conn.Begin(ctx)
@@ -17,10 +17,10 @@ func (d *Database) DeleteBatch(
 		return err
 	}
 
-	for _, v := range shortIDs {
+	for _, v := range shortURLs.ShortURLs {
 		args := pgx.NamedArgs{
 			"shortURL": v,
-			"userID":   userID,
+			"userID":   shortURLs.UserID,
 		}
 		_, err := tx.Exec(ctx, deleteURLQuery, args)
 		if err != nil {
