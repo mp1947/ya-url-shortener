@@ -5,6 +5,8 @@ import (
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/handler"
 	"github.com/mp1947/ya-url-shortener/internal/middleware"
+	"github.com/mp1947/ya-url-shortener/internal/repository"
+	"github.com/mp1947/ya-url-shortener/internal/repository/database"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"go.uber.org/zap"
 )
@@ -12,6 +14,7 @@ import (
 func CreateRouter(
 	c config.Config,
 	s service.Service,
+	repo repository.Repository,
 	l *zap.Logger,
 ) *gin.Engine {
 
@@ -26,8 +29,13 @@ func CreateRouter(
 	r.Any("/", h.ShortenURL)
 	r.Any("/:id", h.GetOriginalURLByID)
 
+	if repo.GetType() == "database" {
+		r.GET("/ping", h.Ping(repo.(*database.Database)))
+	}
+
 	api := r.Group("/api")
 	api.POST("/shorten", h.JSONShortenURL)
+	api.POST("/shorten/batch", h.BatchShortenURL)
 
 	return r
 }

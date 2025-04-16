@@ -17,10 +17,16 @@ run-debug: build
 check-code:
 	staticcheck ./...
 	go vet ./...
-	golangci-lint run --issues-exit-code 1 --print-issued-lines=true  ./...
+	golangci-lint run  ./...
 
 test-all:
 	go test -v ./...
+
+up:
+	docker compose up -d
+
+down:
+	docker compose down
 
 update-workflows:
 	git fetch template && git checkout template/main .github

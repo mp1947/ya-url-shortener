@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"context"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,7 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/eventlog"
+	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
@@ -30,6 +32,10 @@ var cfg = config.Config{
 	BaseURL:         &baseURL,
 	FileStoragePath: &fileStoragePath,
 }
+var storage = &inmemory.Memory{}
+var l, _ = logger.InitLogger()
+var storageInitializedErr = storage.Init(context.Background(), cfg, l)
+var hs = initTestHandlerService()
 
 func TestShortenURL(t *testing.T) {
 
@@ -70,7 +76,6 @@ func TestShortenURL(t *testing.T) {
 		},
 	}
 
-	h := initTestHandlerService()
 	gin.SetMode(gin.TestMode)
 
 	for _, test := range tests {
@@ -82,12 +87,12 @@ func TestShortenURL(t *testing.T) {
 
 			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
 
-			h.ShortenURL(c)
+			hs.ShortenURL(c)
 
 			result := w.Result()
 
 			body := result.Body
-			defer body.Close()
+			defer body.Close() //nolint:errcheck
 
 			bodyData, err := io.ReadAll(body)
 			statusCode := result.StatusCode
@@ -108,12 +113,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 
 	randomID := usecase.GenerateIDFromURL(testURL)
 
-	storage := &inmemory.Memory{}
-	storage.Init()
-	storage.Save(randomID, testURL)
-
-	service := service.ShortenService{Storage: storage}
-	h := HandlerService{Service: &service}
+	storage.Save(context.TODO(), randomID, testURL)
 
 	type request struct {
 		httpMethod    string
@@ -159,14 +159,14 @@ func TestGetOriginalURLByID(t *testing.T) {
 				},
 			}
 
-			h.GetOriginalURLByID(c)
+			hs.GetOriginalURLByID(c)
 
 			result := w.Result()
 
 			respStatusCode := result.StatusCode
 			location := result.Header.Get("Location")
 
-			defer result.Body.Close()
+			defer result.Body.Close() //nolint:errcheck
 
 			assert.Equal(t, test.expectedStatusCode, respStatusCode)
 
@@ -222,8 +222,6 @@ func TestJSONShortenURL(t *testing.T) {
 		},
 	}
 
-	h := initTestHandlerService()
-
 	gin.SetMode(gin.TestMode)
 
 	for _, tc := range tests {
@@ -239,12 +237,12 @@ func TestJSONShortenURL(t *testing.T) {
 
 			t.Logf("sending %s request to %s", c.Request.Method, c.Request.RequestURI)
 
-			h.JSONShortenURL(c)
+			hs.JSONShortenURL(c)
 
 			result := w.Result()
 
 			body := result.Body
-			defer body.Close()
+			defer body.Close() //nolint:errcheck
 
 			bodyData, err := io.ReadAll(body)
 			statusCode := result.StatusCode
@@ -263,16 +261,11 @@ func TestJSONShortenURL(t *testing.T) {
 
 func initTestHandlerService() HandlerService {
 
-	storage := &inmemory.Memory{}
-	storage.Init()
-
-	ep, err := eventlog.NewEventProcessor(cfg)
-
-	if err != nil {
-		panic(err)
+	if storageInitializedErr != nil {
+		log.Fatalf("error initializing storage: %v", storageInitializedErr)
 	}
 
-	service := service.ShortenService{Storage: storage, EP: *ep}
+	service := service.ShortenService{Storage: storage, Logger: l}
 
 	return HandlerService{Service: &service, Cfg: cfg}
 }

@@ -1,18 +1,25 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/eventlog"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
-	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
+	"github.com/mp1947/ya-url-shortener/internal/repository"
+	"github.com/mp1947/ya-url-shortener/internal/repository/database"
 	"github.com/mp1947/ya-url-shortener/internal/router"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"go.uber.org/zap"
 )
 
 func main() {
+
+	cfg := config.Config{}
+	cfg.InitConfig()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	logger, err := logger.InitLogger()
 
@@ -22,52 +29,34 @@ func main() {
 
 	defer logger.Sync() //nolint:errcheck
 
-	logger.Info("initializing web server")
-
-	logger.Info("parsing configuration parameters")
-	cfg := config.Config{}
-	cfg.InitConfig()
-
 	logger.Info(
-		"config has been initialized",
+		"initializing web application with config",
 		zap.String("host", *cfg.ListenAddr),
 		zap.String("base_url", *cfg.BaseURL),
 	)
 
-	logger.Info("creating and initializing storage")
+	storage, err := repository.CreateRepository(logger, cfg, ctx)
 
-	storage := &inmemory.Memory{}
-	storage.Init()
+	if err != nil {
+		logger.Fatal("error creating repository", zap.Error(err))
+	}
 
 	logger.Info(
 		"storage has been initialized",
-		zap.String("type", storage.StorageType),
+		zap.String("type", storage.GetType()),
 	)
 
-	ep, err := eventlog.NewEventProcessor(cfg)
-
-	if err != nil {
-		logger.Fatal("failed creating new event processor", zap.Error(err))
+	switch storage.GetType() {
+	case "database":
+		defer storage.(*database.Database).Close()
 	}
-
-	logger.Info(
-		"restoring records from file storage",
-		zap.String("file_storage_path", *cfg.FileStoragePath),
-	)
-	numRecordsRestored, err := ep.RestoreFromFile(cfg, storage, logger)
-
-	if err != nil {
-		logger.Fatal("error loading data from file", zap.Error(err))
-	}
-
-	logger.Info("records restored", zap.Int("count", numRecordsRestored))
 
 	service := service.ShortenService{
 		Storage: storage,
-		EP:      *ep,
+		Logger:  logger,
 	}
 
-	r := router.CreateRouter(cfg, &service, logger)
+	r := router.CreateRouter(cfg, &service, storage, logger)
 
 	logger.Info(
 		"router has been created. web server is ready to start",
