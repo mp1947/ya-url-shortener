@@ -15,12 +15,7 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 	var request dto.ShortenRequest
 	rawRequest, err := c.GetRawData()
 
-	userID, exists := c.Get("user_id")
-
-	if !exists {
-		c.Status(http.StatusUnauthorized)
-		return
-	}
+	userID, _ := c.Get("user_id")
 
 	if err != nil {
 		c.JSON(

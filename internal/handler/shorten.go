@@ -12,12 +12,7 @@ import (
 
 func (s HandlerService) ShortenURL(c *gin.Context) {
 
-	userID, exists := c.Get("user_id")
-
-	if !exists {
-		c.Status(http.StatusUnauthorized)
-		return
-	}
+	userID, _ := c.Get("user_id")
 
 	if c.Request.Method != http.MethodPost {
 		c.Data(http.StatusBadRequest, contentTypePlain, nil)

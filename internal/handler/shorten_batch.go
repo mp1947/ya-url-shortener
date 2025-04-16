@@ -10,12 +10,7 @@ import (
 
 func (s HandlerService) BatchShortenURL(c *gin.Context) {
 	var batchRequestData []dto.BatchShortenRequest
-	userID, exists := c.Get("user_id")
-
-	if !exists {
-		c.Status(http.StatusUnauthorized)
-		return
-	}
+	userID, _ := c.Get("user_id")
 
 	if err := c.ShouldBindJSON(&batchRequestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
