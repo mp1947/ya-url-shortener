@@ -23,6 +23,10 @@ func (d *Database) Init(
 		return err
 	}
 
+	if d.conn != nil {
+		d.conn.Close()
+	}
+
 	d.conn, err = pgxpool.NewWithConfig(ctx, pgConfig)
 	if err != nil {
 		return err

@@ -23,6 +23,14 @@ func (s HandlerService) DeleteUserURLs(c *gin.Context) {
 		})
 		return
 	}
+
+	if len(userURLsToDelete) < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "no urls provided for deletion",
+		})
+		return
+	}
+
 	err := s.Service.DeleteURLsBatch(
 		c.Request.Context(),
 		userURLsToDelete,
