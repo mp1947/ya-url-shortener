@@ -22,5 +22,6 @@ func (s *ShortenService) ProcessDeletions() {
 		if err := s.Storage.DeleteBatch(context.TODO(), data); err != nil {
 			s.Logger.Warn("error batch-deleting short urls", zap.Error(err))
 		}
+		s.Logger.Info("data has been deleted from the database", zap.Any("data", data))
 	}
 }
