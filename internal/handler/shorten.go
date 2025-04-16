@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 )
 
@@ -16,7 +15,8 @@ func (s HandlerService) ShortenURL(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 
 	if !exists {
-		userID = uuid.New().String()
+		c.Status(http.StatusUnauthorized)
+		return
 	}
 
 	if c.Request.Method != http.MethodPost {
