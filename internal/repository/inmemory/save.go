@@ -4,8 +4,8 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/mp1947/ya-url-shortener/internal/entity"
 	"github.com/mp1947/ya-url-shortener/internal/eventlog"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 )
@@ -38,7 +38,7 @@ func (s *Memory) Save(
 
 func (s *Memory) SaveBatch(
 	ctx context.Context,
-	urls []entity.URLWithCorrelation,
+	urls []model.URLWithCorrelation,
 	userID string,
 ) (bool, error) {
 	for _, v := range urls {

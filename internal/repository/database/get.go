@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/mp1947/ya-url-shortener/internal/entity"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 )
 
-func (d *Database) Get(ctx context.Context, shortURL string) (entity.URL, error) {
+func (d *Database) Get(ctx context.Context, shortURL string) (model.URL, error) {
 	args := pgx.NamedArgs{
 		"shortURL": shortURL,
 	}
@@ -16,16 +16,16 @@ func (d *Database) Get(ctx context.Context, shortURL string) (entity.URL, error)
 	var isDeleted bool
 	err := row.Scan(&originalURLFromDB, &isDeleted)
 	if err != nil {
-		return entity.URL{}, err
+		return model.URL{}, err
 	}
-	return entity.URL{
+	return model.URL{
 		ShortURLID:  shortURL,
 		OriginalURL: originalURLFromDB,
 		IsDeleted:   isDeleted,
 	}, nil
 }
 
-func (d *Database) GetURLsByUserID(ctx context.Context, userID string) ([]entity.UserURL, error) {
+func (d *Database) GetURLsByUserID(ctx context.Context, userID string) ([]model.UserURL, error) {
 
 	args := pgx.NamedArgs{
 		"userID": userID,
@@ -37,7 +37,7 @@ func (d *Database) GetURLsByUserID(ctx context.Context, userID string) ([]entity
 	}
 	defer rows.Close()
 
-	UserURL := make([]entity.UserURL, len(rows.RawValues()))
+	UserURL := make([]model.UserURL, len(rows.RawValues()))
 
 	for rows.Next() {
 		var originalURL, shortURL string
@@ -47,7 +47,7 @@ func (d *Database) GetURLsByUserID(ctx context.Context, userID string) ([]entity
 		if err != nil {
 			return nil, err
 		}
-		UserURL = append(UserURL, entity.UserURL{
+		UserURL = append(UserURL, model.UserURL{
 			ShortURLID:  shortURL,
 			OriginalURL: originalURL,
 		})

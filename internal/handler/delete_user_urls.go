@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mp1947/ya-url-shortener/internal/entity"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 )
 
 func (s HandlerService) DeleteUserURLs(c *gin.Context) {
@@ -34,7 +34,7 @@ func (s HandlerService) DeleteUserURLs(c *gin.Context) {
 
 	s.Service.DeleteURLsBatch(
 		c.Request.Context(),
-		entity.BatchDeleteShortURLs{
+		model.BatchDeleteShortURLs{
 			ShortURLs: userURLsToDelete,
 			UserID:    fmt.Sprintf("%s", userID),
 		},

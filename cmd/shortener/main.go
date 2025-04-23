@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/entity"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
 	"github.com/mp1947/ya-url-shortener/internal/router"
@@ -56,7 +56,7 @@ func main() {
 		Storage: storage,
 		Logger:  logger,
 		Cfg:     &cfg,
-		CommCh:  make(chan entity.BatchDeleteShortURLs),
+		CommCh:  make(chan model.BatchDeleteShortURLs),
 	}
 	defer close(service.CommCh)
 

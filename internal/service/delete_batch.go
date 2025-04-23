@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 
-	"github.com/mp1947/ya-url-shortener/internal/entity"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 	"go.uber.org/zap"
 )
 
 func (s *ShortenService) DeleteURLsBatch(
 	ctx context.Context,
-	shortURLs entity.BatchDeleteShortURLs,
+	shortURLs model.BatchDeleteShortURLs,
 ) {
 	s.Logger.Info(
 		"putting short urls to delete into channel",

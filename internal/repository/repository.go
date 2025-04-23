@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/entity"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"go.uber.org/zap"
@@ -14,10 +14,10 @@ import (
 type Repository interface {
 	Init(ctx context.Context, cfg config.Config, l *zap.Logger) error
 	Save(ctx context.Context, shortURLID, originalURL string, userID string) error
-	SaveBatch(ctx context.Context, urls []entity.URLWithCorrelation, userID string) (bool, error)
-	DeleteBatch(ctx context.Context, shortURLs entity.BatchDeleteShortURLs) (int64, error)
-	Get(ctx context.Context, shortURL string) (entity.URL, error)
-	GetURLsByUserID(ctx context.Context, userID string) ([]entity.UserURL, error)
+	SaveBatch(ctx context.Context, urls []model.URLWithCorrelation, userID string) (bool, error)
+	DeleteBatch(ctx context.Context, shortURLs model.BatchDeleteShortURLs) (int64, error)
+	Get(ctx context.Context, shortURL string) (model.URL, error)
+	GetURLsByUserID(ctx context.Context, userID string) ([]model.UserURL, error)
 	GetType() string
 }
 

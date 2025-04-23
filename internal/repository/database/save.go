@@ -7,8 +7,8 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/mp1947/ya-url-shortener/internal/entity"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 )
 
 func (d *Database) Save(
@@ -39,7 +39,7 @@ func (d *Database) Save(
 
 func (d *Database) SaveBatch(
 	ctx context.Context,
-	urls []entity.URLWithCorrelation,
+	urls []model.URLWithCorrelation,
 	userID string,
 ) (bool, error) {
 	tx, err := d.conn.Begin(ctx)

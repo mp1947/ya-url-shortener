@@ -5,12 +5,12 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/mp1947/ya-url-shortener/internal/entity"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 )
 
 func (d *Database) DeleteBatch(
 	ctx context.Context,
-	shortURLs entity.BatchDeleteShortURLs,
+	shortURLs model.BatchDeleteShortURLs,
 ) (int64, error) {
 
 	tx, err := d.conn.Begin(ctx)

@@ -5,6 +5,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
+	embed "github.com/mp1947/ya-url-shortener"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/pressly/goose/v3"
 	"go.uber.org/zap"
@@ -36,7 +37,7 @@ func (d *Database) Init(
 		return err
 	}
 
-	goose.SetBaseFS(embedMigrations)
+	goose.SetBaseFS(embed.EmbedMigrations)
 	goose.SetLogger(goose.NopLogger())
 
 	if err := goose.SetDialect("postgres"); err != nil {

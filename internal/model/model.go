@@ -1,4 +1,4 @@
-package entity
+package model
 
 type URLWithCorrelation struct {
 	ShortURLID    string

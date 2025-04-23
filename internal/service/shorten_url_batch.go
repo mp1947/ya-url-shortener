@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/mp1947/ya-url-shortener/internal/dto"
-	"github.com/mp1947/ya-url-shortener/internal/entity"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
 	"go.uber.org/zap"
 )
@@ -20,12 +20,12 @@ func (s *ShortenService) ShortenURLBatch(
 		zap.Any("batch_data", batchData),
 	)
 
-	urls := make([]entity.URLWithCorrelation, len(batchData))
+	urls := make([]model.URLWithCorrelation, len(batchData))
 	result := make([]dto.BatchShortenResponse, len(batchData))
 
 	for i, v := range batchData {
 		shortURLID := usecase.GenerateIDFromURL(v.OriginalURL)
-		urls[i] = entity.URLWithCorrelation{
+		urls[i] = model.URLWithCorrelation{
 			ShortURLID:    shortURLID,
 			OriginalURL:   v.OriginalURL,
 			CorrelationID: v.CorrelationID,

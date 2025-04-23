@@ -3,13 +3,13 @@ package inmemory
 import (
 	"context"
 
-	"github.com/mp1947/ya-url-shortener/internal/entity"
 	"github.com/mp1947/ya-url-shortener/internal/eventlog"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 )
 
 func (s *Memory) DeleteBatch(
 	ctx context.Context,
-	shortURLs entity.BatchDeleteShortURLs,
+	shortURLs model.BatchDeleteShortURLs,
 ) (int64, error) {
 	var counter int64
 	for _, v := range shortURLs.ShortURLs {
