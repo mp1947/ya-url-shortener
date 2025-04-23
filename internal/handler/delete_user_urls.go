@@ -32,20 +32,13 @@ func (s HandlerService) DeleteUserURLs(c *gin.Context) {
 		return
 	}
 
-	err := s.Service.DeleteURLsBatch(
+	s.Service.DeleteURLsBatch(
 		c.Request.Context(),
 		entity.BatchDeleteShortURLs{
 			ShortURLs: userURLsToDelete,
 			UserID:    fmt.Sprintf("%s", userID),
 		},
 	)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "error processing delete request",
-		})
-		return
-	}
 
 	c.JSON(http.StatusAccepted, gin.H{
 		"message": "in progress",

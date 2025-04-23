@@ -10,13 +10,13 @@ import (
 func (s *ShortenService) DeleteURLsBatch(
 	ctx context.Context,
 	shortURLs entity.BatchDeleteShortURLs,
-) error {
+) {
 	s.Logger.Info(
 		"putting short urls to delete into channel",
 		zap.Any("data", shortURLs),
 	)
 	s.CommCh <- shortURLs
-	return nil
+
 }
 
 func (s *ShortenService) ProcessDeletions() {

@@ -1,13 +1,12 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func (s HandlerService) GetUserURLS(c *gin.Context) {
+func (s HandlerService) GetUserURLs(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 
 	if !exists {
@@ -15,10 +14,11 @@ func (s HandlerService) GetUserURLS(c *gin.Context) {
 		return
 	}
 
+	userIDStr := userID.(string)
+
 	resp, err := s.Service.GetUserURLs(
 		c.Request.Context(),
-		s.Cfg,
-		fmt.Sprintf("%s", userID),
+		userIDStr,
 	)
 
 	if err != nil {

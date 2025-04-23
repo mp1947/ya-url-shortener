@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/mp1947/ya-url-shortener/config"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
 	"go.uber.org/zap"
@@ -12,7 +11,6 @@ import (
 
 func (s *ShortenService) ShortenURL(
 	ctx context.Context,
-	cfg config.Config,
 	url string,
 	userID string,
 ) (string, error) {
@@ -34,11 +32,11 @@ func (s *ShortenService) ShortenURL(
 			zap.Error(err),
 			zap.String("original_url", url),
 		)
-		return generateShortURL(*cfg.BaseURL, shortURLID), err
+		return generateShortURL(*s.Cfg.BaseURL, shortURLID), err
 	} else if err != nil {
 		s.Logger.Warn("unexpected error", zap.Error(err))
 		return "", err
 	}
 
-	return generateShortURL(*cfg.BaseURL, shortURLID), nil
+	return generateShortURL(*s.Cfg.BaseURL, shortURLID), nil
 }

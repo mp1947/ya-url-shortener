@@ -3,14 +3,12 @@ package service
 import (
 	"context"
 
-	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
 	"go.uber.org/zap"
 )
 
 func (s *ShortenService) GetUserURLs(
 	ctx context.Context,
-	cfg config.Config,
 	userID string,
 ) ([]dto.ShortenURLsByUserID, error) {
 	s.Logger.Info(
@@ -29,7 +27,7 @@ func (s *ShortenService) GetUserURLs(
 
 	for i, v := range userURLs {
 		userURLsResponse[i] = dto.ShortenURLsByUserID{
-			ShortURL:    generateShortURL(*cfg.BaseURL, v.ShortURLID),
+			ShortURL:    generateShortURL(*s.Cfg.BaseURL, v.ShortURLID),
 			OriginalURL: v.OriginalURL,
 		}
 	}

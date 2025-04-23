@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -28,9 +27,8 @@ func (s HandlerService) ShortenURL(c *gin.Context) {
 
 	shortURL, err := s.Service.ShortenURL(
 		c.Request.Context(),
-		s.Cfg,
 		string(body),
-		fmt.Sprintf("%s", userID),
+		userID.(string),
 	)
 
 	if errors.Is(err, shrterr.ErrOriginalURLAlreadyExists) {

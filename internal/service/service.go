@@ -15,21 +15,18 @@ import (
 type Service interface {
 	ShortenURL(
 		ctx context.Context,
-		cfg config.Config,
 		url string,
 		userID string,
 	) (string, error)
 	GetOriginalURL(ctx context.Context, shortURLID string) (entity.URL, error)
 	ShortenURLBatch(
 		ctx context.Context,
-		cfg config.Config,
 		batchData []dto.BatchShortenRequest,
 		userID string,
 	) ([]dto.BatchShortenResponse, error)
-	DeleteURLsBatch(ctx context.Context, shortURLs entity.BatchDeleteShortURLs) error
+	DeleteURLsBatch(ctx context.Context, shortURLs entity.BatchDeleteShortURLs)
 	GetUserURLs(
 		ctx context.Context,
-		cfg config.Config,
 		userID string,
 	) ([]dto.ShortenURLsByUserID, error)
 }
@@ -37,6 +34,7 @@ type Service interface {
 type ShortenService struct {
 	Storage repository.Repository
 	EP      eventlog.EventProcessor
+	Cfg     *config.Config
 	Logger  *zap.Logger
 	CommCh  chan entity.BatchDeleteShortURLs
 }

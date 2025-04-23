@@ -25,7 +25,7 @@ func CreateRouter(
 	r.Use(middleware.LoggerMiddleware(l))
 	r.Use(middleware.GzipMiddleware())
 
-	h := handler.HandlerService{Service: s, Cfg: c}
+	h := handler.HandlerService{Service: s}
 
 	r.Any("/", h.ShortenURL)
 	r.Any("/:id", h.GetOriginalURLByID)
@@ -38,7 +38,7 @@ func CreateRouter(
 	api.POST("/shorten", h.JSONShortenURL)
 	api.POST("/shorten/batch", h.BatchShortenURL)
 
-	api.GET("/user/urls", h.GetUserURLS)
+	api.GET("/user/urls", h.GetUserURLs)
 	api.DELETE("/user/urls", h.DeleteUserURLs)
 
 	return r

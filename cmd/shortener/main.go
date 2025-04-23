@@ -55,6 +55,7 @@ func main() {
 	service := service.ShortenService{
 		Storage: storage,
 		Logger:  logger,
+		Cfg:     &cfg,
 		CommCh:  make(chan entity.BatchDeleteShortURLs),
 	}
 	defer close(service.CommCh)

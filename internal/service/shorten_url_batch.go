@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/dto"
 	"github.com/mp1947/ya-url-shortener/internal/entity"
 	"github.com/mp1947/ya-url-shortener/internal/usecase"
@@ -13,7 +12,6 @@ import (
 
 func (s *ShortenService) ShortenURLBatch(
 	ctx context.Context,
-	cfg config.Config,
 	batchData []dto.BatchShortenRequest,
 	userID string,
 ) ([]dto.BatchShortenResponse, error) {
@@ -34,7 +32,7 @@ func (s *ShortenService) ShortenURLBatch(
 		}
 		result[i] = dto.BatchShortenResponse{
 			CorrelationID: v.CorrelationID,
-			ShortURL:      fmt.Sprintf("%s/%s", *cfg.BaseURL, shortURLID),
+			ShortURL:      fmt.Sprintf("%s/%s", *s.Cfg.BaseURL, shortURLID),
 		}
 	}
 

@@ -36,7 +36,6 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 
 	shortURL, err := s.Service.ShortenURL(
 		c.Request.Context(),
-		s.Cfg,
 		string(request.URL),
 		fmt.Sprintf("%s", userID),
 	)

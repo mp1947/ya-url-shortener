@@ -15,7 +15,11 @@ func (s *ShortenService) GetOriginalURL(
 	s.Logger.Info("processing short url with id", zap.String("short_url_id", shortURLID))
 	data, err := s.Storage.Get(ctx, shortURLID)
 	if err != nil {
-		s.Logger.Warn("error getting original_url by short_url_id", zap.String("short_url", shortURLID))
+		s.Logger.Warn(
+			"error getting original_url by short_url_id",
+			zap.String("short_url", shortURLID),
+			zap.Error(err),
+		)
 		return entity.URL{}, err
 	}
 	s.Logger.Info(

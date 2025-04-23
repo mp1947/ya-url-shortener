@@ -28,7 +28,6 @@ func (s HandlerService) BatchShortenURL(c *gin.Context) {
 
 	data, err := s.Service.ShortenURLBatch(
 		c.Request.Context(),
-		s.Cfg,
 		batchRequestData,
 		fmt.Sprintf("%s", userID),
 	)

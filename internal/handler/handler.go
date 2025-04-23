@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 )
 
@@ -14,5 +13,4 @@ const (
 
 type HandlerService struct {
 	Service service.Service
-	Cfg     config.Config
 }
