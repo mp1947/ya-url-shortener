@@ -11,6 +11,8 @@ const (
 	requestBodyGetErr = "error getting request body"
 )
 
+// HandlerService provides HTTP handler methods and holds a reference to the core service logic.
+// Service is the main business logic layer that HandlerService delegates requests to.
 type HandlerService struct {
 	Service service.Service
 }

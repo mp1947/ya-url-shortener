@@ -2,6 +2,8 @@ ENTRYPOINT=cmd/shortener/main.go
 GO_VERSION=1.24.4
 APP_NAME=shortener
 
+.PHONY: tidy build run run-debug check-code test bench
+
 tidy:
 	@go mod tidy -go=${GO_VERSION}
 

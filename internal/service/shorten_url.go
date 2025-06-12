@@ -9,6 +9,20 @@ import (
 	"go.uber.org/zap"
 )
 
+// ShortenURL generates a shortened URL for the given original URL and associates it with the specified user ID.
+// It logs the process of shortening, generates a unique short URL ID, and attempts to save the mapping in storage.
+// If the original URL already exists, it returns the existing short URL and a specific error.
+// On other errors, it returns an empty string and the error.
+// On success, it returns the generated short URL and nil error.
+//
+// Parameters:
+//   - ctx: context for request-scoped values, cancellation, and deadlines.
+//   - url: the original URL to be shortened.
+//   - userID: the identifier of the user requesting the shortening.
+//
+// Returns:
+//   - string: the shortened URL.
+//   - error: error if the operation failed, or a specific error if the URL already exists.
 func (s *ShortenService) ShortenURL(
 	ctx context.Context,
 	url string,

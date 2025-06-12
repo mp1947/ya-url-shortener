@@ -12,6 +12,12 @@ import (
 	"go.uber.org/zap"
 )
 
+// CreateRouter initializes and configures a new Gin router with the provided configuration, service, repository, and logger.
+// It sets up middleware for recovery, authentication, logging, and gzip compression.
+// The function registers HTTP handlers for URL shortening, retrieval, batch operations, user-specific endpoints, and health checks.
+// If the repository type is "database", a /ping endpoint is added for database connectivity checks.
+// The function also registers pprof endpoints for profiling and debugging.
+// Returns the configured *gin.Engine instance.
 func CreateRouter(
 	c config.Config,
 	s service.Service,

@@ -7,6 +7,18 @@ import (
 	"go.uber.org/zap"
 )
 
+// GetUserURLs retrieves all shortened URLs associated with a specific user ID.
+// It logs the processing event, fetches the URLs from the storage layer, and constructs
+// a response containing both the short and original URLs for each entry.
+// Returns a slice of ShortenURLsByUserID DTOs or an error if retrieval fails.
+//
+// Parameters:
+//   - ctx: context.Context for request-scoped values and cancellation.
+//   - userID: string representing the unique identifier of the user.
+//
+// Returns:
+//   - []dto.ShortenURLsByUserID: slice containing the user's shortened URLs.
+//   - error: error encountered during retrieval, or nil if successful.
 func (s *ShortenService) GetUserURLs(
 	ctx context.Context,
 	userID string,

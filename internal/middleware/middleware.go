@@ -11,6 +11,10 @@ import (
 	"go.uber.org/zap"
 )
 
+// LoggerMiddleware returns a Gin middleware handler that logs details about each HTTP request.
+// It logs the request URI, HTTP method, processing duration, response status code, and response body size
+// using the provided zap.Logger instance. The middleware should be attached to a Gin router to enable
+// structured logging of incoming requests and their corresponding responses.
 func LoggerMiddleware(log *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		requestURI := c.Request.URL.RequestURI()
@@ -34,6 +38,13 @@ func LoggerMiddleware(log *zap.Logger) gin.HandlerFunc {
 	}
 }
 
+// GzipMiddleware is a Gin middleware that transparently handles gzip compression and decompression for HTTP requests and responses.
+//
+// For incoming requests, if the "Content-Encoding" header contains "gzip", the middleware decompresses the request body before passing it to the next handler.
+// For outgoing responses, if the "Accept-Encoding" header indicates support for gzip, the middleware compresses the response body using gzip and sets the "Content-Encoding: gzip" header.
+// If the client does not support gzip, the response is sent uncompressed.
+//
+// This middleware ensures efficient bandwidth usage for clients that support gzip, while maintaining compatibility with clients that do not.
 func GzipMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -81,6 +92,11 @@ func GzipMiddleware() gin.HandlerFunc {
 	}
 }
 
+// shouldUseGzip determines whether gzip compression should be used based on the
+// provided Accept-Encoding header value. It returns true if "gzip" is present
+// in the header and its quality value (q) is not set to 0 or 0.0, indicating
+// that the client accepts gzip encoding. Returns false if "gzip" is absent or
+// explicitly declined by the client.
 func shouldUseGzip(acceptEncoding string) bool {
 	if acceptEncoding == "" {
 		return false
