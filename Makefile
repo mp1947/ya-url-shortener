@@ -22,6 +22,9 @@ check-code:
 test:
 	go test -v ./...
 
+bench:
+	go test -bench=. -benchmem -benchtime=1000ms -run=^Benchmark ./...
+
 up:
 	docker compose up -d
 
