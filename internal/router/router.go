@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/handler"
@@ -40,6 +41,8 @@ func CreateRouter(
 
 	api.GET("/user/urls", h.GetUserURLs)
 	api.DELETE("/user/urls", h.DeleteUserURLs)
+
+	pprof.Register(r, "debug/pprof")
 
 	return r
 }

@@ -1,5 +1,5 @@
 ENTRYPOINT=cmd/shortener/main.go
-GO_VERSION=1.22.12
+GO_VERSION=1.24.4
 APP_NAME=shortener
 
 tidy:
