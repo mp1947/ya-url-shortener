@@ -7,6 +7,9 @@ import (
 	"github.com/mp1947/ya-url-shortener/internal/model"
 )
 
+// Get retrieves the original URL and deletion status associated with the given short URL identifier from the database.
+// It returns a model.URL containing the short URL ID, the original URL, and a deletion flag.
+// If the short URL is not found or a database error occurs, an error is returned.
 func (d *Database) Get(ctx context.Context, shortURL string) (model.URL, error) {
 	args := pgx.NamedArgs{
 		"shortURL": shortURL,
