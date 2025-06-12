@@ -11,6 +11,9 @@ import (
 	"github.com/mp1947/ya-url-shortener/internal/model"
 )
 
+// Save inserts a new short URL mapping into the database, associating the given shortURLID with the originalURL and userID.
+// If the originalURL already exists for a user, it returns shrterr.ErrOriginalURLAlreadyExists.
+// Returns an error if the operation fails for other reasons.
 func (d *Database) Save(
 	ctx context.Context,
 	shortURLID, originalURL string,
@@ -37,6 +40,10 @@ func (d *Database) Save(
 	return nil
 }
 
+// SaveBatch saves a batch of shortened URLs to the database within a single transaction.
+// It takes a context, a slice of model.URLWithCorrelation containing the URLs to save,
+// and the userID associated with the URLs. If any insert fails, the transaction is rolled back.
+// Returns true if all URLs are saved successfully, otherwise returns false and an error.
 func (d *Database) SaveBatch(
 	ctx context.Context,
 	urls []model.URLWithCorrelation,

@@ -8,6 +8,10 @@ import (
 	"go.uber.org/zap"
 )
 
+// Init initializes the in-memory storage for the Memory repository.
+// It sets up the configuration, logger, and internal data structures,
+// and creates a new event processor. Returns an error if the event
+// processor cannot be created.
 func (s *Memory) Init(
 	ctx context.Context,
 	cfg config.Config,

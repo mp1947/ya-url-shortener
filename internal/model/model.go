@@ -23,6 +23,9 @@ type URL struct {
 	IsDeleted   bool
 }
 
+// BatchDeleteShortURLs represents a request to delete a batch of shortened URLs
+// associated with a specific user. It contains a slice of short URL identifiers
+// and the user ID of the owner.
 type BatchDeleteShortURLs struct {
 	ShortURLs []string
 	UserID    string

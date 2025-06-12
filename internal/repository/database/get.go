@@ -25,6 +25,9 @@ func (d *Database) Get(ctx context.Context, shortURL string) (model.URL, error) 
 	}, nil
 }
 
+// GetURLsByUserID retrieves all URLs associated with the specified user ID from the database.
+// It returns a slice of model.UserURL containing the original and shortened URLs for the user.
+// If an error occurs during the query or scanning process, it returns the error.
 func (d *Database) GetURLsByUserID(ctx context.Context, userID string) ([]model.UserURL, error) {
 
 	args := pgx.NamedArgs{
