@@ -35,6 +35,7 @@ func (cfg *Config) InitConfig() {
 	viper.SetConfigName("values")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config")
+	viper.AddConfigPath("../config")
 	viper.AddConfigPath("../../config")
 
 	if err := viper.ReadInConfig(); err != nil {

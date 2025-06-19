@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	gz "github.com/mp1947/ya-url-shortener/pkg/gzip"
 	"go.uber.org/zap"
 )
 
@@ -82,9 +83,9 @@ func GzipMiddleware() gin.HandlerFunc {
 			gzw.Close()
 		}()
 
-		c.Writer = &gzipWriter{
+		c.Writer = &gz.GzipWriter{
 			ResponseWriter: c.Writer,
-			writer:         gzw,
+			Writer:         gzw,
 		}
 		c.Writer.Header().Set("Content-Encoding", "gzip")
 

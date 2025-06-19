@@ -5,10 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/handler"
-	"github.com/mp1947/ya-url-shortener/internal/middleware"
+	im "github.com/mp1947/ya-url-shortener/internal/middleware"
 	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
 	"github.com/mp1947/ya-url-shortener/internal/service"
+	pm "github.com/mp1947/ya-url-shortener/pkg/middleware"
 	"go.uber.org/zap"
 )
 
@@ -28,9 +29,9 @@ func CreateRouter(
 	r := gin.New()
 
 	r.Use(gin.Recovery())
-	r.Use(middleware.AuthMiddleware(l))
-	r.Use(middleware.LoggerMiddleware(l))
-	r.Use(middleware.GzipMiddleware())
+	r.Use(im.AuthMiddleware(l))
+	r.Use(pm.LoggerMiddleware(l))
+	r.Use(pm.GzipMiddleware())
 
 	h := handler.HandlerService{Service: s}
 

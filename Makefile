@@ -27,6 +27,10 @@ test:
 bench:
 	go test -bench=. -benchmem -benchtime=10s -run=^Benchmark ./...
 
+coverage:
+	go test -covermode=count -coverprofile=coverage.out ./...
+	go tool cover -func=coverage.out
+
 up:
 	docker compose up -d
 
