@@ -3,12 +3,17 @@ package handler_test
 import (
 	"context"
 	"log"
+	"net"
+	"net/http"
+	"time"
 
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/handler"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
+	"github.com/mp1947/ya-url-shortener/internal/router"
 	"github.com/mp1947/ya-url-shortener/internal/service"
+	"go.uber.org/zap"
 )
 
 const (
@@ -38,4 +43,25 @@ func initTestHandlerService() handler.HandlerService {
 	service := service.ShortenService{Storage: storage, Logger: l, Cfg: &cfg}
 
 	return handler.HandlerService{Service: &service}
+}
+
+func setupTestServer() (string, func()) {
+	router := router.CreateRouter(cfg, hs.Service, storage, l)
+	listener, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		l.Fatal("failed to start test server", zap.Error(err))
+	}
+	srv := &http.Server{Handler: router}
+
+	go func() {
+		if err := srv.Serve(listener); err != nil && err != http.ErrServerClosed {
+			l.Fatal("server error", zap.Error(err))
+		}
+	}()
+
+	return "http://" + listener.Addr().String(), func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		defer cancel()
+		_ = srv.Shutdown(ctx)
+	}
 }

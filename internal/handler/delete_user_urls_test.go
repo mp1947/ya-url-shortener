@@ -1,25 +1,26 @@
 package handler_test
 
 import (
+	"net/http"
 	"testing"
 
-	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"resty.dev/v3"
 )
 
 func TestDeleteUserURLS(t *testing.T) {
+	t.Run("test bad request", func(t *testing.T) {
+		baseURL, shutdown := setupTestServer()
+		defer shutdown()
+		client := resty.New()
+		defer client.Close()
+		ids := []string{"12343213", "12345322"}
 
-	gin.SetMode(gin.TestMode)
-	t.Run("test delete user urls", func(t *testing.T) {
-		// 	w := httptest.NewRecorder()
-		// 	c, _ := gin.CreateTestContext(w)
+		resp, err := client.R().
+			SetBody(ids).
+			Delete(baseURL + "/api/user/urls")
 
-		// 	c.Request = httptest.NewRequest(http.MethodDelete, "/", nil)
-		// 	hs.DeleteUserURLs(c)
-
-		// 	result := w.Result()
-		// 	respStatusCode := result.StatusCode
-		// 	defer result.Body.Close()
-		// 	t.Logf("unauthenticated delete request returns %v status code", respStatusCode)
-		// 	assert.Equal(t, respStatusCode, http.StatusUnauthorized)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode())
 	})
 }
