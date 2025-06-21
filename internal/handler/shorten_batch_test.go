@@ -43,7 +43,7 @@ func TestBatchShortenURL(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
 			client := resty.New()
-			defer client.Close()
+			defer client.Close() //nolint: errcheck
 
 			resp, err := client.R().
 				SetBody(test.requestData).

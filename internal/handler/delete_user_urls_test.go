@@ -13,7 +13,7 @@ func TestDeleteUserURLS(t *testing.T) {
 		baseURL, shutdown := setupTestServer()
 		defer shutdown()
 		client := resty.New()
-		defer client.Close()
+		defer client.Close() //nolint: errcheck
 		ids := []string{"12343213", "12345322"}
 
 		resp, err := client.R().

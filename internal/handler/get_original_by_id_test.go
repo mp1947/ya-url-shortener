@@ -18,7 +18,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 
 	userID := uuid.New().String()
 
-	storage.Save(context.TODO(), randomID, testURL, userID)
+	storage.Save(context.TODO(), randomID, testURL, userID) //nolint: errcheck
 
 	type request struct {
 		httpMethod    string

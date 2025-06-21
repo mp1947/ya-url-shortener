@@ -10,6 +10,7 @@ import (
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/handler"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
+	"github.com/mp1947/ya-url-shortener/internal/model"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
 	"github.com/mp1947/ya-url-shortener/internal/router"
 	"github.com/mp1947/ya-url-shortener/internal/service"
@@ -40,7 +41,12 @@ func initTestHandlerService() handler.HandlerService {
 		log.Fatalf("error initializing storage: %v", storageInitializedErr)
 	}
 
-	service := service.ShortenService{Storage: storage, Logger: l, Cfg: &cfg}
+	service := service.ShortenService{
+		Storage: storage,
+		Logger:  l,
+		Cfg:     &cfg,
+		CommCh:  make(chan model.BatchDeleteShortURLs, 1),
+	}
 
 	return handler.HandlerService{Service: &service}
 }
