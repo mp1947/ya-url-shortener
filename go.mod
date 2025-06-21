@@ -12,6 +12,7 @@ require (
 	github.com/pressly/goose/v3 v3.24.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
+	go.uber.org/mock v0.5.2
 	go.uber.org/zap v1.21.0
 	resty.dev/v3 v3.0.0-beta.3
 )
