@@ -11,6 +11,11 @@ import (
 	"go.uber.org/zap"
 )
 
+// Repository defines the interface for URL storage and retrieval operations.
+// It abstracts the underlying data storage mechanism and provides methods for
+// initializing the repository, saving single or multiple URLs, deleting URLs in batch,
+// retrieving a URL by its short identifier, fetching all URLs associated with a user,
+// and obtaining the repository type.
 type Repository interface {
 	Init(ctx context.Context, cfg config.Config, l *zap.Logger) error
 	Save(ctx context.Context, shortURLID, originalURL string, userID string) error
@@ -21,6 +26,11 @@ type Repository interface {
 	GetType() string
 }
 
+// CreateRepository initializes and returns a storage repository based on the provided configuration.
+// It selects either an in-memory or database-backed storage implementation depending on the presence
+// of a database DSN in the configuration. For in-memory storage, it attempts to restore records from
+// a file if a file storage path is specified. Logs are emitted for key initialization steps.
+// Returns the initialized Repository or an error if initialization fails.
 func CreateRepository(
 	l *zap.Logger,
 	cfg config.Config,

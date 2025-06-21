@@ -9,6 +9,11 @@ import (
 	"go.uber.org/zap"
 )
 
+// AuthMiddleware is a Gin middleware that handles user authentication via a "token" cookie.
+// If the token is valid, it extracts the user ID and sets it in the request context.
+// If the token is missing or invalid, it generates a new user ID, creates a new token,
+// sets it as a cookie, and stores the new user ID in the context.
+// The middleware logs relevant events using the provided zap.Logger.
 func AuthMiddleware(log *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cookie, _ := c.Cookie("token")

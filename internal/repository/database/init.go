@@ -11,6 +11,11 @@ import (
 	"go.uber.org/zap"
 )
 
+// Init initializes the Database connection using the provided configuration and logger.
+// It parses the database DSN, establishes a new connection pool, pings the database to ensure connectivity,
+// and applies any pending migrations using Goose. If a previous connection exists, it is closed before
+// establishing a new one. The function sets the storage type to "database" upon successful initialization.
+// Returns an error if any step fails.
 func (d *Database) Init(
 	ctx context.Context,
 	cfg config.Config,

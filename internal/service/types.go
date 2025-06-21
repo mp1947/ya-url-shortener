@@ -11,6 +11,10 @@ import (
 	"go.uber.org/zap"
 )
 
+// Service defines the interface for URL shortening service operations.
+// It provides methods for shortening URLs (individually and in batch),
+// retrieving the original URL by its shortened ID, deleting batches of URLs,
+// and fetching all shortened URLs associated with a specific user.
 type Service interface {
 	ShortenURL(
 		ctx context.Context,
@@ -30,6 +34,14 @@ type Service interface {
 	) ([]dto.ShortenURLsByUserID, error)
 }
 
+// ShortenService provides methods for URL shortening operations.
+// It manages storage, event processing, configuration, logging, and batch deletion communication.
+// Fields:
+//   - Storage: Interface to the URL repository for storing and retrieving shortened URLs.
+//   - EP: Event processor for handling service events.
+//   - Cfg: Service configuration settings.
+//   - Logger: Structured logger for service logging.
+//   - CommCh: Channel for batch deletion of short URLs.
 type ShortenService struct {
 	Storage repository.Repository
 	EP      eventlog.EventProcessor

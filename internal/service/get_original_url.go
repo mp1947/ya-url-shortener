@@ -7,6 +7,9 @@ import (
 	"go.uber.org/zap"
 )
 
+// GetOriginalURL retrieves the original URL associated with the given short URL ID.
+// It logs the process of fetching the URL, including any errors encountered and the result.
+// Returns the corresponding model.URL and an error if the retrieval fails.
 func (s *ShortenService) GetOriginalURL(
 	ctx context.Context,
 	shortURLID string,

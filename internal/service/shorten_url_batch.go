@@ -10,6 +10,19 @@ import (
 	"go.uber.org/zap"
 )
 
+// ShortenURLBatch processes a batch of URL shortening requests for a specific user.
+// It generates short URLs for each original URL in the batch, associates them with the provided user ID,
+// and saves the batch to the storage. The function returns a slice of BatchShortenResponse containing
+// the correlation IDs and the corresponding shortened URLs. If an error occurs during storage, it returns the error.
+//
+// Parameters:
+//   - ctx: context.Context for request-scoped values, cancellation, and deadlines.
+//   - batchData: slice of BatchShortenRequest containing the original URLs and correlation IDs.
+//   - userID: string representing the user for whom the URLs are being shortened.
+//
+// Returns:
+//   - []dto.BatchShortenResponse: slice containing the correlation IDs and shortened URLs.
+//   - error: error encountered during the batch save operation, if any.
 func (s *ShortenService) ShortenURLBatch(
 	ctx context.Context,
 	batchData []dto.BatchShortenRequest,

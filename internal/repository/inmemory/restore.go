@@ -10,6 +10,10 @@ import (
 	"go.uber.org/zap"
 )
 
+// RestoreFromFile restores the in-memory storage state from a file specified in the configuration.
+// It reads each line from the file, unmarshals it into an eventlog.Event, and saves it to the storage.
+// The method returns the number of records restored and any error encountered during the process.
+// If an error occurs while saving a record, it logs a warning but continues processing the rest of the file.
 func (s *Memory) RestoreFromFile(l *zap.Logger) (int, error) {
 	file, err := os.OpenFile(*s.cfg.FileStoragePath, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {

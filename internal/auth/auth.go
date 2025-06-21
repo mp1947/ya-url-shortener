@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// Claims holds JWT claims, embedding standard fields and a user ID.
 type Claims struct {
 	UserID uuid.UUID `json:"user_id"`
 	jwt.RegisteredClaims
@@ -15,6 +16,8 @@ type Claims struct {
 
 var secretKey = []byte(os.Getenv("SECRET_KEY"))
 
+// CreateToken generates a JWT for the given userID using HS256 signing.
+// Returns the token string or an error.
 func CreateToken(userID uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		UserID: userID,
@@ -28,6 +31,8 @@ func CreateToken(userID uuid.UUID) (string, error) {
 	return tokenString, nil
 }
 
+// Validate checks the validity of a JWT token string and returns whether it's valid and the associated user UUID.
+// Returns false and uuid.Nil if the token is invalid or empty.
 func Validate(tokenString string) (bool, uuid.UUID) {
 
 	if tokenString == "" {
