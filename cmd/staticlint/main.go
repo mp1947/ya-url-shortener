@@ -78,6 +78,64 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil
 }
 
+// main is the entry point of the static analysis tool. It constructs a list of analyzers to be run by multichecker.Main.
+// The analyzers included are:
+//   - myOSExitInMainAnalyzer: Custom analyzer to detect usage of os.Exit in main functions.
+//   - staticcheck.Analyzers: A set of analyzers from the staticcheck suite (SA*), which detect bugs and suspicious constructs.
+//   - stylecheck.Analyzers: A set of analyzers from the staticcheck suite (ST*), which enforce style rules.
+//   - errcheck.Analyzer: Checks for unchecked errors in code.
+//   - analyzer.Analyzer: go-critic analyzer, which provides a wide range of code improvement suggestions.
+//   - appends.Analyzer: Detects suspicious uses of the append function.
+//   - asmdecl.Analyzer: Reports mismatches between assembly files and Go declarations.
+//   - assign.Analyzer: Detects useless assignments.
+//   - atomic.Analyzer: Checks for common mistakes using the sync/atomic package.
+//   - atomicalign.Analyzer: Checks for non-64-bit-aligned arguments to sync/atomic functions.
+//   - bools.Analyzer: Detects common mistakes involving boolean expressions.
+//   - buildssa.Analyzer: Builds SSA (Static Single Assignment) form for Go programs (internal use).
+//   - buildtag.Analyzer: Checks for invalid or duplicate build tags.
+//   - cgocall.Analyzer: Detects calls to C code that may block the Go scheduler.
+//   - composite.Analyzer: Checks for composite literal issues.
+//   - copylock.Analyzer: Detects locks that are copied by value.
+//   - ctrlflow.Analyzer: Checks for unreachable code and other control flow issues.
+//   - deepequalerrors.Analyzer: Detects incorrect uses of reflect.DeepEqual with error values.
+//   - defers.Analyzer: Checks for common mistakes in defer statements.
+//   - directive.Analyzer: Checks for malformed compiler directives.
+//   - errorsas.Analyzer: Checks for incorrect usage of errors.As.
+//   - fieldalignment.Analyzer: Suggests struct field reordering to reduce memory usage.
+//   - findcall.Analyzer: Finds calls to a specified function (configurable).
+//   - framepointer.Analyzer: Checks for functions that may require frame pointers.
+//   - gofix.Analyzer: Checks for code that gofix can fix automatically.
+//   - hostport.Analyzer: Checks for suspicious host:port strings.
+//   - httpmux.Analyzer: Checks for suspicious patterns in HTTP request multiplexer usage.
+//   - httpresponse.Analyzer: Checks for mistakes handling HTTP responses.
+//   - ifaceassert.Analyzer: Detects impossible interface type assertions.
+//   - inspect.Analyzer: Provides a syntax tree inspection API for other analyzers (internal use).
+//   - loopclosure.Analyzer: Detects common mistakes in closures within loops.
+//   - lostcancel.Analyzer: Detects context cancellations that are not called.
+//   - nilfunc.Analyzer: Detects comparisons of functions to nil.
+//   - nilness.Analyzer: Checks for redundant or impossible nil comparisons.
+//   - pkgfact.Analyzer: Provides package-wide facts for other analyzers (internal use).
+//   - printf.Analyzer: Checks for printf-style formatting errors.
+//   - reflectvaluecompare.Analyzer: Detects incorrect comparisons of reflect.Value objects.
+//   - shadow.Analyzer: Detects shadowed variables.
+//   - shift.Analyzer: Detects suspicious bit shift operations.
+//   - sigchanyzer.Analyzer: Detects misuse of signal channels.
+//   - slog.Analyzer: Checks for issues with structured logging.
+//   - sortslice.Analyzer: Detects suspicious uses of sort.Slice.
+//   - stdmethods.Analyzer: Checks for misspelled method names of standard interfaces.
+//   - stdversion.Analyzer: Checks for usage of features not available in the targeted Go version.
+//   - stringintconv.Analyzer: Detects suspicious conversions between strings and integers.
+//   - structtag.Analyzer: Checks for struct tag format issues.
+//   - testinggoroutine.Analyzer: Detects goroutines started in tests that may outlive the test.
+//   - tests.Analyzer: Checks for common mistakes in test code.
+//   - timeformat.Analyzer: Checks for incorrect usage of time formatting patterns.
+//   - unmarshal.Analyzer: Checks for issues in unmarshaling data into Go structs.
+//   - unreachable.Analyzer: Detects unreachable code.
+//   - unsafeptr.Analyzer: Detects misuse of unsafe pointers.
+//   - unusedresult.Analyzer: Detects unused results of calls to certain functions.
+//   - unusedwrite.Analyzer: Detects unused writes to variables.
+//   - usesgenerics.Analyzer: Checks for usage of generics (type parameters).
+//   - waitgroup.Analyzer: Detects misuse of sync.WaitGroup.
 func main() {
 
 	mychecks := []*analysis.Analyzer{}
@@ -101,7 +159,6 @@ func main() {
 	// second public analyzer: go-critic
 	mychecks = append(mychecks, analyzer.Analyzer)
 
-	// all analysis/passes analyzers
 	mychecks = append(mychecks, appends.Analyzer)
 	mychecks = append(mychecks, asmdecl.Analyzer)
 	mychecks = append(mychecks, assign.Analyzer)
