@@ -17,14 +17,14 @@ build: tidy mock
 build-multichecker: tidy
 	@go build -o ./bin/${MULTICHECKER_NAME} ${MULTICHECKER_ENTRYPOINT}
 
-run: build up mock
+run: build mock
 	@GIN_MODE=release ./bin/${SHORTENER_NAME} ${ARGS}
 
 run-debug: build up
 	@GIN_MODE=debug ./bin/${SHORTENER_NAME} ${ARGS}
 
 multichecker: build-multichecker
-	./bin/${MULTICHECKER_NAME} ./...
+	go list ./... | grep -v mocks | xargs ./bin/${MULTICHECKER_NAME} -test=false
 
 test: mock
 	go test -v ./...

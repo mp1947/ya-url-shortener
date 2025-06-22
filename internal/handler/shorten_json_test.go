@@ -77,9 +77,7 @@ func TestJSONShortenURL(t *testing.T) {
 			result := w.Result()
 
 			body := result.Body
-			defer func() {
-				_ = body.Close()
-			}()
+			defer body.Close()
 
 			bodyData, err := io.ReadAll(body)
 			statusCode := result.StatusCode

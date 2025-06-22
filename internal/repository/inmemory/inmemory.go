@@ -12,7 +12,6 @@ import (
 // as well as event logs associated with shortened URLs. The struct also
 // holds configuration settings, an event processor for handling events,
 // a flag indicating if the storage is in restore mode, and the type of storage used.
-
 type Memory struct {
 	EP              *eventlog.EventProcessor
 	data            map[string]string
