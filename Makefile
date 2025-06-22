@@ -1,6 +1,8 @@
-ENTRYPOINT=cmd/shortener/main.go
+SHORTENER_ENTRYPOINT=cmd/shortener/main.go
+MULTICHECKER_ENTRYPOINT=cmd/staticlint/main.go
 GO_VERSION=1.24.4
-APP_NAME=shortener
+SHORTENER_NAME=shortener
+MULTICHECKER_NAME=multichecker
 MOCKS_SOURCE=internal/repository/repository.go
 MOCKS_DEST=internal/mocks/mock_repository.go
 
@@ -10,18 +12,20 @@ tidy:
 	@go mod tidy -go=${GO_VERSION}
 
 build: tidy mock
-	@go build -o ./bin/${APP_NAME} ${ENTRYPOINT}
+	@go build -o ./bin/${SHORTENER_NAME} ${SHORTENER_ENTRYPOINT}
+
+build-multichecker: tidy
+	@go build -o ./bin/${MULTICHECKER_NAME} ${MULTICHECKER_ENTRYPOINT}
 
 run: build up mock
-	@GIN_MODE=release ./bin/${APP_NAME} ${ARGS}
+	@GIN_MODE=release ./bin/${SHORTENER_NAME} ${ARGS}
 
 run-debug: build up
-	@GIN_MODE=debug ./bin/${APP_NAME} ${ARGS}
+	@GIN_MODE=debug ./bin/${SHORTENER_NAME} ${ARGS}
 
-check-code:
-	staticcheck ./...
+check-code: build-multichecker
 	go vet ./...
-	golangci-lint run  ./...
+	./bin/${MULTICHECKER_NAME} ./...
 
 test: mock
 	go test -v ./...
