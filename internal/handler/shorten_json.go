@@ -43,7 +43,7 @@ func (s HandlerService) JSONShortenURL(c *gin.Context) {
 		return
 	}
 
-	if err := json.Unmarshal(rawRequest, &request); err != nil {
+	if unmarshalErr := json.Unmarshal(rawRequest, &request); unmarshalErr != nil {
 
 		c.JSON(
 			http.StatusBadRequest,

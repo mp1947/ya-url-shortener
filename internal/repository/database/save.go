@@ -29,8 +29,7 @@ func (d *Database) Save(
 	_, err := d.conn.Exec(ctx, insertShortURLQuery, args)
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
-		switch pgErr.Code {
-		case pgerrcode.UniqueViolation:
+		if pgErr.Code == pgerrcode.UniqueViolation {
 			return shrterr.ErrOriginalURLAlreadyExists
 		}
 	} else if err != nil {
@@ -60,12 +59,12 @@ func (d *Database) SaveBatch(
 			"originalURL": v.OriginalURL,
 			"userID":      userID,
 		}
-		_, err := tx.Exec(ctx, insertShortURLQuery, args)
-		if err != nil {
+		_, ExecErr := tx.Exec(ctx, insertShortURLQuery, args)
+		if ExecErr != nil {
 			if rbErr := tx.Rollback(ctx); rbErr != nil {
 				return false, rbErr
 			}
-			return false, err
+			return false, ExecErr
 		}
 	}
 

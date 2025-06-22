@@ -1,3 +1,5 @@
+// Package service provides core business logic for URL shortening operations,
+// including URL creation, retrieval, batch processing, deletion, and user-specific queries.
 package service
 
 import (
@@ -43,9 +45,9 @@ type Service interface {
 //   - Logger: Structured logger for service logging.
 //   - CommCh: Channel for batch deletion of short URLs.
 type ShortenService struct {
-	Storage repository.Repository
-	EP      eventlog.EventProcessor
 	Cfg     *config.Config
 	Logger  *zap.Logger
 	CommCh  chan model.BatchDeleteShortURLs
+	Storage repository.Repository
+	EP      eventlog.EventProcessor
 }

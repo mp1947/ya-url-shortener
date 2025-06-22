@@ -1,3 +1,5 @@
+// Package middleware provides Gin middleware for logging HTTP requests and handling gzip compression/decompression.
+// It includes middleware for structured request logging and transparent gzip support for efficient bandwidth usage.
 package middleware
 
 import (
@@ -60,7 +62,10 @@ func GzipMiddleware() gin.HandlerFunc {
 				})
 				return
 			}
-			defer reader.Close()
+			defer func() {
+				_ = reader.Close()
+			}()
+
 			c.Request.Body = io.NopCloser(reader)
 		}
 
@@ -74,13 +79,13 @@ func GzipMiddleware() gin.HandlerFunc {
 		gzw, err := gzip.NewWriterLevel(c.Writer, gzip.BestSpeed)
 
 		if err != nil {
-			io.WriteString(c.Writer, err.Error())
+			_, _ = io.WriteString(c.Writer, err.Error())
 			return
 		}
 
 		defer func() {
-			gzw.Flush()
-			gzw.Close()
+			_ = gzw.Flush()
+			_ = gzw.Close()
 		}()
 
 		c.Writer = &gz.GzipWriter{

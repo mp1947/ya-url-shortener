@@ -15,8 +15,8 @@ func TestBatchShortenURL(t *testing.T) {
 	url += "/api/shorten/batch"
 
 	tests := []struct {
-		testName         string
 		requestData      any
+		testName         string
 		expectedRespCode int
 	}{
 		{
@@ -43,7 +43,9 @@ func TestBatchShortenURL(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
 			client := resty.New()
-			defer client.Close() //nolint: errcheck
+			defer func() {
+				_ = client.Close()
+			}()
 
 			resp, err := client.R().
 				SetBody(test.requestData).

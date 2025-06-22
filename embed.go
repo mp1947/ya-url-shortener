@@ -1,6 +1,5 @@
+// Package embed embeds migrations
 package embed
-
-//embeds migrations
 
 import "embed"
 

@@ -1,3 +1,4 @@
+// Package model defines data structures for representing shortened URLs, user associations, and batch operations in the URL shortener service.
 package model
 
 // URLWithCorrelation represents a URL mapping with an associated correlation ID.
@@ -27,6 +28,6 @@ type URL struct {
 // associated with a specific user. It contains a slice of short URL identifiers
 // and the user ID of the owner.
 type BatchDeleteShortURLs struct {
-	ShortURLs []string
 	UserID    string
+	ShortURLs []string
 }

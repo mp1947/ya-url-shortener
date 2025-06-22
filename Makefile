@@ -23,8 +23,7 @@ run: build up mock
 run-debug: build up
 	@GIN_MODE=debug ./bin/${SHORTENER_NAME} ${ARGS}
 
-check-code: build-multichecker
-	go vet ./...
+multichecker: build-multichecker
 	./bin/${MULTICHECKER_NAME} ./...
 
 test: mock
