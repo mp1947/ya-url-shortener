@@ -50,7 +50,12 @@ func (d *Database) Init(
 	}
 
 	db := stdlib.OpenDBFromPool(d.conn)
-	defer db.Close()
+	defer func() {
+		err := db.Close()
+		if err != nil {
+			l.Error("error closing database connection", zap.Error(err))
+		}
+	}()
 
 	if err := goose.Up(db, "migrations"); err != nil {
 		return err

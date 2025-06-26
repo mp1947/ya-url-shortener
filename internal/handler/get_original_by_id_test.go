@@ -18,7 +18,7 @@ func TestGetOriginalURLByID(t *testing.T) {
 
 	userID := uuid.New().String()
 
-	storage.Save(context.TODO(), randomID, testURL, userID) //nolint: errcheck
+	_ = storage.Save(context.TODO(), randomID, testURL, userID) //nolint: errcheck
 
 	type request struct {
 		httpMethod    string
@@ -26,10 +26,10 @@ func TestGetOriginalURLByID(t *testing.T) {
 	}
 
 	tests := []struct {
-		testName           string
 		request            request
-		expectedStatusCode int
+		testName           string
 		expectedLocation   string
+		expectedStatusCode int
 	}{
 		{
 			testName: "test incorrect id",
@@ -71,7 +71,9 @@ func TestGetOriginalURLByID(t *testing.T) {
 			respStatusCode := result.StatusCode
 			location := result.Header.Get("Location")
 
-			defer result.Body.Close() //nolint:errcheck
+			defer func() {
+				_ = result.Body.Close()
+			}()
 
 			assert.Equal(t, test.expectedStatusCode, respStatusCode)
 

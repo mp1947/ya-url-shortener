@@ -1,3 +1,5 @@
+// Package main initializes and starts the URL shortener web application,
+// setting up configuration, logging, storage, services, and the HTTP server.
 package main
 
 import (
@@ -25,10 +27,15 @@ func main() {
 	logger, err := logger.InitLogger()
 
 	if err != nil {
-		log.Fatalf("error while initializing logger: %v", err)
+		log.Printf("error while initializing logger: %v\n", err)
 	}
 
-	defer logger.Sync() //nolint:errcheck
+	defer func() {
+		if syncErr := logger.Sync(); err != nil {
+			log.Fatalf("error while syncing logger: %v", syncErr)
+		}
+		logger.Info("logger has been synced")
+	}()
 
 	logger.Info(
 		"initializing web application with config",
@@ -47,8 +54,7 @@ func main() {
 		zap.String("type", storage.GetType()),
 	)
 
-	switch storage.GetType() {
-	case "database":
+	if storage.GetType() == "database" {
 		defer storage.(*database.Database).Close()
 	}
 

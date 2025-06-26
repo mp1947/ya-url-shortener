@@ -1,3 +1,5 @@
+// Package gzip provides middleware and utilities for enabling gzip compression
+// of HTTP responses in Gin web applications.
 package gzip
 
 import (
@@ -6,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// gzipWriter is a custom wrapper around gin.ResponseWriter that enables gzip compression
+// GzipWriter is a custom wrapper around gin.ResponseWriter that enables gzip compression
 // for HTTP responses. It embeds the original ResponseWriter, adds an io.Writer for
 // compressed output, and tracks the HTTP status code.
 type GzipWriter struct {

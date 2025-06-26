@@ -1,3 +1,4 @@
+// Package dto provides data transfer objects for URL shortening requests and responses.
 package dto
 
 // ShortenRequest represents a request payload for shortening a URL.

@@ -1,3 +1,4 @@
+// Package usecase provides business logic for the URL shortener service.
 package usecase
 
 import (

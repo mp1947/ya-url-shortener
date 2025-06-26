@@ -33,7 +33,10 @@ func (s *Memory) Save(
 		}
 		s.shortURLToEvent[shortURLID] = event
 		if !s.isInRestoreMode {
-			s.EP.WriteEvent(&event)
+			err := s.EP.WriteEvent(&event)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}
