@@ -16,6 +16,12 @@ import (
 	"go.uber.org/zap"
 )
 
+var (
+	buildVersion string = "N/A"
+	buildDate    string = "N/A"
+	buildCommit  string = "N/A"
+)
+
 func main() {
 
 	cfg := config.Config{}
@@ -29,6 +35,8 @@ func main() {
 	if err != nil {
 		log.Printf("error while initializing logger: %v\n", err)
 	}
+
+	printStartupInfo(logger)
 
 	defer func() {
 		if syncErr := logger.Sync(); err != nil {
@@ -77,4 +85,10 @@ func main() {
 	if err := r.Run(*cfg.ListenAddr); err != nil {
 		logger.Fatal("error starting web server", zap.Error(err))
 	}
+}
+
+func printStartupInfo(l *zap.Logger) {
+	l.Info("Build version", zap.String("version", buildVersion))
+	l.Info("Build date", zap.String("date", buildDate))
+	l.Info("Build commit", zap.String("commit", buildCommit))
 }
