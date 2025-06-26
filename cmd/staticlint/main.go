@@ -68,10 +68,26 @@ var myOSExitInMainAnalyzer = &analysis.Analyzer{
 	Run:  run,
 }
 
-func run(pass *analysis.Pass) (interface{}, error) {
+func run(pass *analysis.Pass) (any, error) {
 	for _, file := range pass.Files {
 		ast.Inspect(file, func(n ast.Node) bool {
 
+			if file.Name.Name != "main" {
+				return true
+			}
+
+			call, ok := n.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+
+			if fun, ok := call.Fun.(*ast.SelectorExpr); ok {
+				if ident, ok := fun.X.(*ast.Ident); ok {
+					if ident.Name == "os" && fun.Sel.Name == "Exit" {
+						pass.Reportf(call.Pos(), "found os.exit() call")
+					}
+				}
+			}
 			return true
 		})
 	}
