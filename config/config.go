@@ -1,3 +1,5 @@
+// Package config provides functionality for loading and managing application configuration
+// from YAML files, environment variables, and command-line flags.
 package config
 
 import (

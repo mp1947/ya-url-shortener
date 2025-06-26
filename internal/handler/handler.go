@@ -1,3 +1,5 @@
+// Package handler provides HTTP handler functions for routing and processing API requests,
+// delegating business logic to the service layer.
 package handler
 
 import (

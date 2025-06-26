@@ -1,3 +1,4 @@
+// Package database provides a PostgreSQL-backed storage layer with connection pooling and configuration management.
 package database
 
 import (

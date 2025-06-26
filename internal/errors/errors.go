@@ -1,3 +1,4 @@
+// Package shrterr defines custom error variables for consistent error handling across the application.
 package shrterr
 
 import "errors"

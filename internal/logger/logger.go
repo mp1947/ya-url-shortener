@@ -1,3 +1,4 @@
+// Package logger configures url-shortener logger
 package logger
 
 import (

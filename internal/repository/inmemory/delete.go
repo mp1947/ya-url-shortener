@@ -7,20 +7,8 @@ import (
 	"github.com/mp1947/ya-url-shortener/internal/model"
 )
 
-// DeleteBatch deletes a batch of short URLs associated with a specific user from the in-memory storage.
-// It iterates over the provided list of short URLs, and for each URL, if it belongs to the given user,
-// it removes the URL from the storage and resets its associated event. The function returns the total
-// number of processed URLs and an error if any occurred.
-//
-// Parameters:
-//
-//	ctx        - The context for cancellation and deadlines.
-//	shortURLs  - A BatchDeleteShortURLs struct containing the user ID and the list of short URLs to delete.
-//
-// Returns:
-//
-//	int64 - The number of processed URLs.
-//	error - An error if the operation fails, otherwise nil.
+// DeleteBatch removes a batch of short URLs for a user from memory.
+// Returns the number of processed URLs and an error if any.
 func (s *Memory) DeleteBatch(
 	ctx context.Context,
 	shortURLs model.BatchDeleteShortURLs,
