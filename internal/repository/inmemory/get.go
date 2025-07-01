@@ -36,7 +36,9 @@ func (s *Memory) GetURLsByUserID(ctx context.Context, userID string) ([]model.Us
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	scanner := bufio.NewScanner(file)
 

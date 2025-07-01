@@ -16,15 +16,15 @@ import (
 func TestShortenURL(t *testing.T) {
 
 	type request struct {
-		httpMethod  string
 		requestBody io.Reader
+		httpMethod  string
 	}
 
 	tests := []struct {
-		testName                string
 		request                 request
-		expectedRespCode        int
+		testName                string
 		expectedRespContentType string
+		expectedRespCode        int
 	}{
 		{
 			testName: "test wrong http method",
@@ -70,7 +70,7 @@ func TestShortenURL(t *testing.T) {
 			result := w.Result()
 
 			body := result.Body
-			defer body.Close() //nolint:errcheck
+			defer body.Close()
 
 			bodyData, err := io.ReadAll(body)
 			statusCode := result.StatusCode

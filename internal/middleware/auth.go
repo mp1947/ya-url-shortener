@@ -1,3 +1,4 @@
+// Package middleware provides Gin middleware components for handling authentication and other cross-cutting concerns.
 package middleware
 
 import (

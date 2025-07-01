@@ -1,3 +1,5 @@
+// Package repository provides abstractions and implementations for URL storage backends,
+// supporting both in-memory and database-based repositories.
 package repository
 
 import (

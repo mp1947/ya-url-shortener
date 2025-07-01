@@ -1,3 +1,4 @@
+// Package router sets up the Gin HTTP router and routes for the URL shortener service.
 package router
 
 import (

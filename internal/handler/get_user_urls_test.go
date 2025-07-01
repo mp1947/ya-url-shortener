@@ -13,7 +13,9 @@ func TestGetUserURLs(t *testing.T) {
 		url, shutdown := setupTestServer()
 		defer shutdown()
 		client := resty.New()
-		defer client.Close() //nolint: errcheck
+		defer func() {
+			_ = client.Close()
+		}()
 
 		resp, err := client.R().Get(url + "/api/user/urls")
 

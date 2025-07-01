@@ -1,3 +1,4 @@
+// Package auth provides JWT-based authentication utilities for generating and validating tokens with user UUIDs.
 package auth
 
 import (
@@ -10,8 +11,8 @@ import (
 
 // Claims holds JWT claims, embedding standard fields and a user ID.
 type Claims struct {
-	UserID uuid.UUID `json:"user_id"`
 	jwt.RegisteredClaims
+	UserID uuid.UUID `json:"user_id"`
 }
 
 var secretKey = []byte(os.Getenv("SECRET_KEY"))
