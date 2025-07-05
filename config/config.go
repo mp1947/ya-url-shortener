@@ -28,6 +28,7 @@ type Config struct {
 	TLSConfig       *TLS
 }
 
+// TLS holds the tls configuration consists of crt and key files path
 type TLS struct {
 	CrtFilePath string
 	KeyFilePath string
