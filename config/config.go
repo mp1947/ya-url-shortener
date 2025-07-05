@@ -13,6 +13,7 @@ import (
 
 const (
 	defaultKeysAreNotFoundErr = "error getting defaults from config"
+	tlsSettingsUndefinedErr   = "cert file path or config file path were not defined in values.yaml config file"
 )
 
 // Config holds the configuration settings for the application, including
@@ -23,6 +24,13 @@ type Config struct {
 	BaseURL         *string
 	FileStoragePath *string
 	DatabaseDSN     *string
+	ShouldUseTLS    *bool
+	TLSConfig       *TLS
+}
+
+type TLS struct {
+	CrtFilePath string
+	KeyFilePath string
 }
 
 // InitConfig initializes the Config struct by loading configuration values from a YAML file,
@@ -59,6 +67,7 @@ func (cfg *Config) InitConfig() {
 	cfg.BaseURL = flag.String("b", defaultBaseURL, "-b http://localhost:8080")
 	cfg.FileStoragePath = flag.String("f", defaultFileStoragePath, "-f ./storage/storage.txt")
 	cfg.DatabaseDSN = flag.String("d", "", "-d postgres://app:pass@localhost:5432/app?pool_max_conns=10&pool_max_conn_lifetime=1h30m")
+	cfg.ShouldUseTLS = flag.Bool("s", false, "-s")
 	flag.Parse()
 
 	if addr := os.Getenv("SERVER_ADDRESS"); addr != "" {
@@ -75,5 +84,26 @@ func (cfg *Config) InitConfig() {
 
 	if databaseDSN := os.Getenv("DATABASE_DSN"); databaseDSN != "" {
 		cfg.DatabaseDSN = &databaseDSN
+	}
+
+	if shouldUseTLS := os.Getenv("ENABLE_HTTPS"); shouldUseTLS != "" {
+		enableTLS := true
+		cfg.ShouldUseTLS = &enableTLS
+	}
+
+	if *cfg.ShouldUseTLS {
+		crtFilePath := viper.GetString("tls.crt_file")
+		keyFilePath := viper.GetString("tls.key_file")
+		tlsConfig := &TLS{
+			CrtFilePath: crtFilePath,
+			KeyFilePath: keyFilePath,
+		}
+		if crtFilePath == "" || keyFilePath == "" {
+			log.Fatalf(
+				"error reading tls settings, %s",
+				errors.New(tlsSettingsUndefinedErr),
+			)
+		}
+		cfg.TLSConfig = tlsConfig
 	}
 }

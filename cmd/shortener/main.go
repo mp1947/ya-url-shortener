@@ -82,9 +82,21 @@ func main() {
 		"router has been created. web server is ready to start",
 	)
 
-	if err := r.Run(*cfg.ListenAddr); err != nil {
-		logger.Fatal("error starting web server", zap.Error(err))
+	if *cfg.ShouldUseTLS {
+		logger.Info("starting web server with tls config", zap.Any("config", *cfg.TLSConfig))
+		if err := r.RunTLS(
+			*cfg.ListenAddr,
+			cfg.TLSConfig.CrtFilePath,
+			cfg.TLSConfig.KeyFilePath,
+		); err != nil {
+			logger.Fatal("error starting tls web server", zap.Error(err))
+		}
+	} else {
+		if err := r.Run(*cfg.ListenAddr); err != nil {
+			logger.Fatal("error starting simple web server", zap.Error(err))
+		}
 	}
+
 }
 
 func printStartupInfo(l *zap.Logger) {
