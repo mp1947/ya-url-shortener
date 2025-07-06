@@ -14,17 +14,9 @@ func TestCreateRepository(t *testing.T) {
 	l, err := logger.InitLogger()
 	assert.NoError(t, err)
 
-	var listenAddr = ":8089"
-	var baseURL = "http://localhost:8089"
-	var fileStoragePath = "./test.out"
-	var cfg = config.Config{
-		ListenAddr:      &listenAddr,
-		BaseURL:         &baseURL,
-		FileStoragePath: &fileStoragePath,
-	}
-	cfg.InitConfig()
+	cfg := config.InitConfig()
 
-	_, err = repository.CreateRepository(l, cfg, context.Background())
+	_, err = repository.CreateRepository(l, *cfg, context.Background())
 	assert.NoError(t, err)
 
 }

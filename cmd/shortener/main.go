@@ -24,8 +24,7 @@ var (
 
 func main() {
 
-	cfg := config.Config{}
-	cfg.InitConfig()
+	cfg := config.InitConfig()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -47,11 +46,11 @@ func main() {
 
 	logger.Info(
 		"initializing web application with config",
-		zap.String("host", *cfg.ListenAddr),
+		zap.String("host", *cfg.ServerAddress),
 		zap.String("base_url", *cfg.BaseURL),
 	)
 
-	storage, err := repository.CreateRepository(logger, cfg, ctx)
+	storage, err := repository.CreateRepository(logger, *cfg, ctx)
 
 	if err != nil {
 		logger.Fatal("error creating repository", zap.Error(err))
@@ -69,14 +68,14 @@ func main() {
 	service := service.ShortenService{
 		Storage: storage,
 		Logger:  logger,
-		Cfg:     &cfg,
+		Cfg:     cfg,
 		CommCh:  make(chan model.BatchDeleteShortURLs),
 	}
 	defer close(service.CommCh)
 
 	go service.ProcessDeletions()
 
-	r := router.CreateRouter(cfg, &service, storage, logger)
+	r := router.CreateRouter(*cfg, &service, storage, logger)
 
 	logger.Info(
 		"router has been created. web server is ready to start",
@@ -85,14 +84,14 @@ func main() {
 	if *cfg.ShouldUseTLS {
 		logger.Info("starting web server with tls config", zap.Any("config", *cfg.TLSConfig))
 		if err := r.RunTLS(
-			*cfg.ListenAddr,
+			*cfg.ServerAddress,
 			cfg.TLSConfig.CrtFilePath,
 			cfg.TLSConfig.KeyFilePath,
 		); err != nil {
 			logger.Fatal("error starting tls web server", zap.Error(err))
 		}
 	} else {
-		if err := r.Run(*cfg.ListenAddr); err != nil {
+		if err := r.Run(*cfg.ServerAddress); err != nil {
 			logger.Fatal("error starting simple web server", zap.Error(err))
 		}
 	}

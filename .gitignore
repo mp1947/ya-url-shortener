@@ -8,6 +8,7 @@ bin
 nopush
 data
 keys
+config.json
 
 # Test binary, built with `go test -c`
 *.test

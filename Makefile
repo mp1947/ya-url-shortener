@@ -42,7 +42,7 @@ mock: tidy
 	mockgen -source=${MOCKS_SOURCE} -destination=${MOCKS_DEST} -package=mocks
 
 coverage:
-	@go test -covermode=count -coverprofile=coverage.out ./... 0
+	@go test -covermode=count -coverprofile=coverage.out ./...
 	grep -vE "mocks|database|inmemory|cmd" coverage.out > coverage.cleaned.out
 	go tool cover -func=coverage.cleaned.out
 
