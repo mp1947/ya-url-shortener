@@ -5,6 +5,11 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/mp1947/ya-url-shortener/config"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
@@ -61,10 +66,6 @@ func main() {
 		zap.String("type", storage.GetType()),
 	)
 
-	if storage.GetType() == "database" {
-		defer storage.(*database.Database).Close()
-	}
-
 	service := service.ShortenService{
 		Storage: storage,
 		Logger:  logger,
@@ -81,21 +82,49 @@ func main() {
 		"router has been created. web server is ready to start",
 	)
 
-	if *cfg.ShouldUseTLS {
-		logger.Info("starting web server with tls config", zap.Any("config", *cfg.TLSConfig))
-		if err := r.RunTLS(
-			*cfg.ServerAddress,
-			cfg.TLSConfig.CrtFilePath,
-			cfg.TLSConfig.KeyFilePath,
-		); err != nil {
-			logger.Fatal("error starting tls web server", zap.Error(err))
-		}
-	} else {
-		if err := r.Run(*cfg.ServerAddress); err != nil {
-			logger.Fatal("error starting simple web server", zap.Error(err))
-		}
+	srv := &http.Server{
+		Addr:    *cfg.ServerAddress,
+		Handler: r.Handler(),
 	}
 
+	go func() {
+		logger.Info("preparing to start web server")
+		if *cfg.ShouldUseTLS {
+			logger.Info("starting web server with tls config", zap.Any("config", *cfg.TLSConfig))
+			if err := srv.ListenAndServeTLS(cfg.TLSConfig.CrtFilePath, cfg.TLSConfig.KeyFilePath); err != nil && err != http.ErrServerClosed {
+				logger.Fatal("error starting http web server with tls", zap.Error(err))
+			}
+		} else {
+			logger.Info("starting http web server")
+			if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				logger.Fatal("error starting http web server", zap.Error(err))
+			}
+		}
+	}()
+
+	gracefuShutdownCh := make(chan os.Signal, 1)
+
+	signal.Notify(gracefuShutdownCh, syscall.SIGINT, syscall.SIGTERM)
+
+	<-gracefuShutdownCh
+
+	logger.Info("received shutdown signal, gracefully shutting down web server")
+
+	shutdownCtx, shutdownCtxCancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer shutdownCtxCancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		logger.Error("graceful shutdown error", zap.Error(err))
+	}
+
+	<-shutdownCtx.Done()
+
+	if storage.GetType() == "database" {
+		logger.Info("closing connection to the database")
+		storage.(*database.Database).Close()
+	}
+
+	logger.Info("goodbye!")
 }
 
 func printStartupInfo(l *zap.Logger) {
