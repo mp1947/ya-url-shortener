@@ -3,26 +3,39 @@
 package config
 
 import (
-	"errors"
 	"flag"
 	"log"
-	"os"
 
 	"github.com/spf13/viper"
 )
 
 const (
 	defaultKeysAreNotFoundErr = "error getting defaults from config"
+	tlsSettingsUndefinedErr   = "cert file path or config file path were not defined in values.yaml config file"
+	defaultServerAddress      = ":8080"
+	defaultBaseURL            = "http://localhost:8080"
+	defaultFileStoragePath    = "./output.out"
+	defaultCrtFilePath        = "./keys/cert.crt"
+	defaultKeyFilePath        = "./keys/key.pem"
 )
 
 // Config holds the configuration settings for the application, including
 // the server listen address, base URL, file storage path, and database DSN.
 // All fields are pointers to strings, allowing for optional configuration values.
 type Config struct {
-	ListenAddr      *string
-	BaseURL         *string
-	FileStoragePath *string
-	DatabaseDSN     *string
+	ServerAddress   *string `mapstructure:"SERVER_ADDRESS"`
+	BaseURL         *string `mapstructure:"BASE_URL"`
+	FileStoragePath *string `mapstructure:"FILE_STORAGE_PATH"`
+	DatabaseDSN     *string `mapstructure:"DATABASE_DSN"`
+	ConfigFilePath  *string
+	ShouldUseTLS    *bool `mapstructure:"ENABLE_HTTPS"`
+	TLSConfig       *TLS
+}
+
+// TLS holds the tls configuration consists of crt and key files path
+type TLS struct {
+	CrtFilePath string `json:"crt_file"`
+	KeyFilePath string `json:"key_file"`
 }
 
 // InitConfig initializes the Config struct by loading configuration values from a YAML file,
@@ -33,47 +46,74 @@ type Config struct {
 // and database DSN, using the loaded configuration values as defaults. After parsing the flags,
 // it checks for corresponding environment variables and, if set, overrides the configuration
 // values with those from the environment.
-func (cfg *Config) InitConfig() {
-	viper.SetConfigName("values")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("./config")
-	viper.AddConfigPath("../config")
-	viper.AddConfigPath("../../config")
+func InitConfig() *Config {
+	cfg := &Config{}
 
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("error reading config file, %s", err)
-	}
+	cfg.ServerAddress = new(string)
+	cfg.BaseURL = new(string)
+	cfg.FileStoragePath = new(string)
+	cfg.DatabaseDSN = new(string)
+	cfg.ConfigFilePath = new(string)
+	cfg.ShouldUseTLS = new(bool)
 
-	defaultListenAddr := viper.GetString("defaults.listen_addr")
-	defaultBaseURL := viper.GetString("defaults.base_url")
-	defaultFileStoragePath := viper.GetString("defaults.file_storage_path")
-
-	if defaultListenAddr == "" || defaultBaseURL == "" || defaultFileStoragePath == "" {
-		log.Fatalf(
-			"error reading settings from config: %s",
-			errors.New(defaultKeysAreNotFoundErr),
-		)
-	}
-
-	cfg.ListenAddr = flag.String("a", defaultListenAddr, "-a :8080")
-	cfg.BaseURL = flag.String("b", defaultBaseURL, "-b http://localhost:8080")
-	cfg.FileStoragePath = flag.String("f", defaultFileStoragePath, "-f ./storage/storage.txt")
-	cfg.DatabaseDSN = flag.String("d", "", "-d postgres://app:pass@localhost:5432/app?pool_max_conns=10&pool_max_conn_lifetime=1h30m")
+	flagServerAddress := flag.String("a", "", "listen address, example: -a :8080, default :8080")
+	flagBaseURL := flag.String("b", "", "base url, example: -b http://localhost:8080, default: http://localhost:8080")
+	flagConfigFile := flag.String("c", "", "config file, example: -c /path/to/config.json")
+	flagFileStoragePath := flag.String("f", "", "storage path (inmemory mode), example: -f ./path/to/storage.txt")
+	flagDatabaseDSN := flag.String("d", "", "database dsn, example: -d postgres://app:pass@localhost:5432/app?pool_max_conns=10&pool_max_conn_lifetime=1h30m")
+	flagShouldUseTLS := flag.Bool("s", false, "if provided, enables https, example: -s")
 	flag.Parse()
 
-	if addr := os.Getenv("SERVER_ADDRESS"); addr != "" {
-		cfg.ListenAddr = &addr
+	v := viper.New()
+	v.SetConfigType("json")
+	v.SetDefault("SERVER_ADDRESS", defaultServerAddress)
+	v.SetDefault("BASE_URL", defaultBaseURL)
+	v.SetDefault("FILE_STORAGE_PATH", defaultFileStoragePath)
+	v.SetDefault("ENABLE_HTTPS", false)
+
+	if *flagConfigFile != "" {
+		v.SetConfigFile(*flagConfigFile)
+		if err := v.ReadInConfig(); err != nil {
+			log.Fatalf("failed to read config file: %v", err)
+		}
 	}
 
-	if baseURL := os.Getenv("BASE_URL"); baseURL != "" {
-		cfg.BaseURL = &baseURL
+	v.AutomaticEnv()
+
+	if err := v.Unmarshal(cfg); err != nil {
+		log.Fatalf("error unmarshalling config: %v", err)
 	}
 
-	if fileStoragePath := os.Getenv("FILE_STORAGE_PATH"); fileStoragePath != "" {
-		cfg.FileStoragePath = &fileStoragePath
+	if *flagServerAddress != "" {
+		cfg.ServerAddress = flagServerAddress
+	}
+	if *flagBaseURL != "" {
+		cfg.BaseURL = flagBaseURL
+	}
+	if *flagFileStoragePath != "" {
+		cfg.FileStoragePath = flagFileStoragePath
+	}
+	if *flagDatabaseDSN != "" {
+		cfg.DatabaseDSN = flagDatabaseDSN
+	}
+	if *flagShouldUseTLS {
+		cfg.ShouldUseTLS = flagShouldUseTLS
 	}
 
-	if databaseDSN := os.Getenv("DATABASE_DSN"); databaseDSN != "" {
-		cfg.DatabaseDSN = &databaseDSN
+	if *cfg.ShouldUseTLS {
+		crtFilePath := viper.GetString("tls_crt_file")
+		keyFilePath := viper.GetString("tls_key_file")
+		tlsConfig := &TLS{
+			CrtFilePath: crtFilePath,
+			KeyFilePath: keyFilePath,
+		}
+		if crtFilePath == "" || keyFilePath == "" {
+			log.Printf("tls_crt_file  or tls_key_file not found in config file, setting default values")
+			tlsConfig.CrtFilePath = defaultCrtFilePath
+			tlsConfig.KeyFilePath = defaultKeyFilePath
+		}
+		cfg.TLSConfig = tlsConfig
 	}
+
+	return cfg
 }

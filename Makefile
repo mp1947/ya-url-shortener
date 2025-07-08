@@ -5,6 +5,7 @@ SHORTENER_NAME=shortener
 MULTICHECKER_NAME=multichecker
 MOCKS_SOURCE=internal/repository/repository.go
 MOCKS_DEST=internal/mocks/mock_repository.go
+KEYS_DIR=./keys
 
 .PHONY: tidy build run run-debug check-code test bench mock
 
@@ -19,6 +20,11 @@ build-multichecker: tidy
 
 run: build mock
 	@GIN_MODE=release ./bin/${SHORTENER_NAME} ${ARGS}
+
+run-tls: build mock
+	@mkdir -p ${KEYS_DIR}
+	mkcert -cert-file ${KEYS_DIR}/cert.crt -key-file ${KEYS_DIR}/key.pem localhost 127.0.0.1 ::1
+	@GIN_MODE=release ./bin/${SHORTENER_NAME} -s ${ARGS}
 
 run-debug: build up
 	@GIN_MODE=debug ./bin/${SHORTENER_NAME} ${ARGS}
@@ -36,8 +42,8 @@ mock: tidy
 	mockgen -source=${MOCKS_SOURCE} -destination=${MOCKS_DEST} -package=mocks
 
 coverage:
-	go test -covermode=count -coverprofile=coverage.out ./...
-	grep -vE "mocks|repository/database|repository/inmemory" coverage.out > coverage.cleaned.out
+	@go test -covermode=count -coverprofile=coverage.out ./...
+	grep -vE "mocks|database|inmemory|cmd" coverage.out > coverage.cleaned.out
 	go tool cover -func=coverage.cleaned.out
 
 up:

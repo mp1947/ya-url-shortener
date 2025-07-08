@@ -10,8 +10,7 @@ import (
 )
 
 func TestEventProcessor(t *testing.T) {
-	cfg := &config.Config{}
-	cfg.InitConfig()
+	cfg := config.InitConfig()
 
 	ep, err := eventlog.NewEventProcessor(*cfg)
 

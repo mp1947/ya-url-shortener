@@ -2,3 +2,6 @@ defaults:
   listen_addr: ":8080"
   base_url: "http://localhost:8080"
   file_storage_path: ./output.out
+tls:
+  crt_file: keys/cert.crt
+  key_file: keys/key.pem
