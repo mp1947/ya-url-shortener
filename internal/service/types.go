@@ -34,6 +34,7 @@ type Service interface {
 		ctx context.Context,
 		userID string,
 	) ([]dto.ShortenURLsByUserID, error)
+	GetInternalStats(ctx context.Context) (*dto.InternalStatsResp, error)
 }
 
 // ShortenService provides methods for URL shortening operations.

@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/mp1947/ya-url-shortener/config"
+	"github.com/mp1947/ya-url-shortener/internal/dto"
 	shrterr "github.com/mp1947/ya-url-shortener/internal/errors"
 	"github.com/mp1947/ya-url-shortener/internal/model"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
@@ -26,6 +27,7 @@ type Repository interface {
 	Get(ctx context.Context, shortURL string) (model.URL, error)
 	GetURLsByUserID(ctx context.Context, userID string) ([]model.UserURL, error)
 	GetType() string
+	GetInternalStats(ctx context.Context) (*dto.InternalStatsResp, error)
 }
 
 // CreateRepository initializes and returns a storage repository based on the provided configuration.

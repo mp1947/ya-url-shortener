@@ -50,6 +50,8 @@ func CreateRouter(
 	api.GET("/user/urls", h.GetUserURLs)
 	api.DELETE("/user/urls", h.DeleteUserURLs)
 
+	api.GET("/internal/stats", im.WithAuthorizedIP(l, c, h.InternalStats))
+
 	pprof.Register(r, "debug/pprof")
 
 	return r

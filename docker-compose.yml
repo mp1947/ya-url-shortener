@@ -7,6 +7,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       PGDATA: /data/postgres
+    restart: always
     volumes:
        - ./data/postgres:/data/postgres
     ports:

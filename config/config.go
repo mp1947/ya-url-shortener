@@ -5,6 +5,7 @@ package config
 import (
 	"flag"
 	"log"
+	"net"
 
 	"github.com/spf13/viper"
 )
@@ -23,13 +24,15 @@ const (
 // the server listen address, base URL, file storage path, and database DSN.
 // All fields are pointers to strings, allowing for optional configuration values.
 type Config struct {
-	ServerAddress   *string `mapstructure:"SERVER_ADDRESS"`
-	BaseURL         *string `mapstructure:"BASE_URL"`
-	FileStoragePath *string `mapstructure:"FILE_STORAGE_PATH"`
-	DatabaseDSN     *string `mapstructure:"DATABASE_DSN"`
-	ConfigFilePath  *string
-	ShouldUseTLS    *bool `mapstructure:"ENABLE_HTTPS"`
-	TLSConfig       *TLS
+	ServerAddress    *string `mapstructure:"SERVER_ADDRESS"`
+	BaseURL          *string `mapstructure:"BASE_URL"`
+	FileStoragePath  *string `mapstructure:"FILE_STORAGE_PATH"`
+	DatabaseDSN      *string `mapstructure:"DATABASE_DSN"`
+	TrustedSubnetRaw *string `mapstructure:"TRUSTED_SUBNET"`
+	TrustedSubnet    *net.IPNet
+	ConfigFilePath   *string
+	ShouldUseTLS     *bool `mapstructure:"ENABLE_HTTPS"`
+	TLSConfig        *TLS
 }
 
 // TLS holds the tls configuration consists of crt and key files path
@@ -55,6 +58,8 @@ func InitConfig() *Config {
 	cfg.DatabaseDSN = new(string)
 	cfg.ConfigFilePath = new(string)
 	cfg.ShouldUseTLS = new(bool)
+	cfg.TrustedSubnetRaw = new(string)
+	cfg.TrustedSubnet = new(net.IPNet)
 
 	flagServerAddress := flag.String("a", "", "listen address, example: -a :8080, default :8080")
 	flagBaseURL := flag.String("b", "", "base url, example: -b http://localhost:8080, default: http://localhost:8080")
@@ -62,6 +67,7 @@ func InitConfig() *Config {
 	flagFileStoragePath := flag.String("f", "", "storage path (inmemory mode), example: -f ./path/to/storage.txt")
 	flagDatabaseDSN := flag.String("d", "", "database dsn, example: -d postgres://app:pass@localhost:5432/app?pool_max_conns=10&pool_max_conn_lifetime=1h30m")
 	flagShouldUseTLS := flag.Bool("s", false, "if provided, enables https, example: -s")
+	flagTrustedSubnet := flag.String("t", "", "trusted subnet: 192.168.1.1./24")
 	flag.Parse()
 
 	v := viper.New()
@@ -70,6 +76,7 @@ func InitConfig() *Config {
 	v.SetDefault("BASE_URL", defaultBaseURL)
 	v.SetDefault("FILE_STORAGE_PATH", defaultFileStoragePath)
 	v.SetDefault("ENABLE_HTTPS", false)
+	v.SetDefault("TRUSTED_SUBNET", "")
 
 	if *flagConfigFile != "" {
 		v.SetConfigFile(*flagConfigFile)
@@ -98,6 +105,23 @@ func InitConfig() *Config {
 	}
 	if *flagShouldUseTLS {
 		cfg.ShouldUseTLS = flagShouldUseTLS
+	}
+
+	if *cfg.TrustedSubnetRaw != "" {
+		_, ipRange, err := net.ParseCIDR(*cfg.TrustedSubnetRaw)
+		if err != nil {
+			log.Fatalf("not a valid ip range in a TRUSTED_SUBNET variable: %s", *cfg.TrustedSubnetRaw)
+		}
+		cfg.TrustedSubnet = ipRange
+	}
+
+	if *flagTrustedSubnet != "" {
+		_, ipRange, err := net.ParseCIDR(*flagTrustedSubnet)
+
+		if err != nil {
+			log.Fatalf("not a valid ip range: %s", *flagTrustedSubnet)
+		}
+		cfg.TrustedSubnet = ipRange
 	}
 
 	if *cfg.ShouldUseTLS {
