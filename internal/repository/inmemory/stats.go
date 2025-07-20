@@ -10,6 +10,6 @@ import (
 // It returns a pointer to dto.InternalStatsResp containing the statistics data,
 // or an error if the operation fails.
 // The context parameter allows for request cancellation and timeout control.
-func (m *Memory) GetInternalStats(ctx context.Context) (*dto.InternalStatsResp, error) {
+func (s *Memory) GetInternalStats(ctx context.Context) (*dto.InternalStatsResp, error) {
 	return nil, nil
 }
