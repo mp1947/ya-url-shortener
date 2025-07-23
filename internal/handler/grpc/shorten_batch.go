@@ -10,6 +10,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// BatchShortenURL handles a batch request to shorten multiple URLs via gRPC.
+// It validates the input, transforms the request data, and delegates the batch shortening
+// operation to the service layer. The method returns a response containing the correlation IDs
+// and shortened URLs for each input, or an error if the operation fails.
+//
+// Parameters:
+//   - ctx: The context for the request, used for cancellation and deadlines.
+//   - in: The batch shorten request containing a slice of URLs and their correlation IDs.
+//
+// Returns:
+//   - *pb.BatchShortenResp: The response containing the shortened URLs and their correlation IDs.
+//   - error: An error if the input is invalid or the shortening operation fails.
 func (g *GRPCService) BatchShortenURL(
 	ctx context.Context,
 	in *pb.BatchShortenReq,

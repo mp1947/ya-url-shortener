@@ -7,6 +7,10 @@ import (
 	pb "github.com/mp1947/ya-url-shortener/internal/proto"
 )
 
+// ShortenURL handles the gRPC request to shorten a given URL.
+// It receives a ShortenURLReq containing the original URL, generates a unique identifier,
+// and calls the underlying service to create a shortened URL.
+// Returns a ShortenURLResp with the shortened URL or an error if the operation fails.
 func (g *GRPCService) ShortenURL(
 	ctx context.Context,
 	in *pb.ShortenURLReq,

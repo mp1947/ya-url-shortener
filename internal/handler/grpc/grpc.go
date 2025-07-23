@@ -7,11 +7,16 @@ import (
 	"github.com/mp1947/ya-url-shortener/internal/service"
 )
 
+// GRPCService implements the gRPC server for the URL shortener service.
+// It embeds the generated UnimplementedShortenerServer to satisfy the gRPC interface
+// and holds a reference to the core service logic via the Service field.
 type GRPCService struct {
 	pb.UnimplementedShortenerServer
 	Service service.Service
 }
 
+// NewGRPCService creates and returns a new GRPCService instance using the provided service.
+// It initializes the GRPCService with the given service implementation.
 func NewGRPCService(s service.Service) *GRPCService {
 	return &GRPCService{Service: s}
 }
