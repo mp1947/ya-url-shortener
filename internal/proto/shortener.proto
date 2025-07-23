@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "github.com/mp1947/ya-url-shortener/internal/proto";
+
+message ShortenURLReq {
+  string url = 1 [json_name = "url"];
+}
+
+message ShortenURLResp {
+  string shortURL = 1 [json_name = "short_url"];
+}
+
+message BatchShortenReq {
+  message BatchShorten {
+    string correlationID = 1 [json_name = "correlation_id"];
+    string originalURL = 2 [json_name = "original_url"];
+  }
+  repeated BatchShorten batchShortenData = 1 [json_name = "batch_shorten_data"];
+}
+
+message BatchShortenResp {
+  message BatchShorten {
+    string correlationID = 1 [json_name = "correlation_id"];
+    string shortURL = 2 [json_name = "short_url"];
+  }
+  repeated BatchShorten batchShortenData = 1 [json_name = "batch_shorten_data"];
+}
+
+message GetOriginalURLByShortReq {
+  string shortURL = 1 [json_name = "short_url"];
+}
+
+message GetOriginalURLByShortResp {
+  string originalURL = 1 [json_name = "original_url"];
+}
+
+service Shortener {
+  rpc ShortenURL(ShortenURLReq) returns (ShortenURLResp);
+  rpc BatchShortenURL(BatchShortenReq) returns (BatchShortenResp);
+  rpc GetOriginalURLByShort(GetOriginalURLByShortReq) returns (GetOriginalURLByShortResp);
+}

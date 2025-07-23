@@ -14,6 +14,7 @@ const (
 	defaultKeysAreNotFoundErr = "error getting defaults from config"
 	tlsSettingsUndefinedErr   = "cert file path or config file path were not defined in values.yaml config file"
 	defaultServerAddress      = ":8080"
+	defaultGRPCPort           = ":9090"
 	defaultBaseURL            = "http://localhost:8080"
 	defaultFileStoragePath    = "./output.out"
 	defaultCrtFilePath        = "./keys/cert.crt"
@@ -29,6 +30,7 @@ type Config struct {
 	FileStoragePath  *string `mapstructure:"FILE_STORAGE_PATH"`
 	DatabaseDSN      *string `mapstructure:"DATABASE_DSN"`
 	TrustedSubnetRaw *string `mapstructure:"TRUSTED_SUBNET"`
+	GRPCPort         *string `mapstructure:"GRPC_PORT"`
 	TrustedSubnet    *net.IPNet
 	ConfigFilePath   *string
 	ShouldUseTLS     *bool `mapstructure:"ENABLE_HTTPS"`
@@ -60,6 +62,7 @@ func InitConfig() *Config {
 	cfg.ShouldUseTLS = new(bool)
 	cfg.TrustedSubnetRaw = new(string)
 	cfg.TrustedSubnet = new(net.IPNet)
+	cfg.GRPCPort = new(string)
 
 	flagServerAddress := flag.String("a", "", "listen address, example: -a :8080, default :8080")
 	flagBaseURL := flag.String("b", "", "base url, example: -b http://localhost:8080, default: http://localhost:8080")
@@ -68,6 +71,7 @@ func InitConfig() *Config {
 	flagDatabaseDSN := flag.String("d", "", "database dsn, example: -d postgres://app:pass@localhost:5432/app?pool_max_conns=10&pool_max_conn_lifetime=1h30m")
 	flagShouldUseTLS := flag.Bool("s", false, "if provided, enables https, example: -s")
 	flagTrustedSubnet := flag.String("t", "", "trusted subnet: 192.168.1.1./24")
+	flagGRPCPort := flag.String("g", "", "grpc port: :9090")
 	flag.Parse()
 
 	v := viper.New()
@@ -77,6 +81,7 @@ func InitConfig() *Config {
 	v.SetDefault("FILE_STORAGE_PATH", defaultFileStoragePath)
 	v.SetDefault("ENABLE_HTTPS", false)
 	v.SetDefault("TRUSTED_SUBNET", "")
+	v.SetDefault("GRPC_PORT", defaultGRPCPort)
 
 	if *flagConfigFile != "" {
 		v.SetConfigFile(*flagConfigFile)
@@ -105,6 +110,10 @@ func InitConfig() *Config {
 	}
 	if *flagShouldUseTLS {
 		cfg.ShouldUseTLS = flagShouldUseTLS
+	}
+
+	if *flagGRPCPort != "" {
+		cfg.GRPCPort = flagGRPCPort
 	}
 
 	if *cfg.TrustedSubnetRaw != "" {

@@ -1,4 +1,4 @@
-package handler_test
+package handlehttp_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/handler"
+	handler "github.com/mp1947/ya-url-shortener/internal/handler/http"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/model"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"

@@ -1,4 +1,4 @@
-package handler_test
+package handlehttp_test
 
 import (
 	"bytes"

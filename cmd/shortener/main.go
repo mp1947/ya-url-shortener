@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,13 +13,17 @@ import (
 	"time"
 
 	"github.com/mp1947/ya-url-shortener/config"
+	handlegrpc "github.com/mp1947/ya-url-shortener/internal/handler/grpc"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/model"
+	"github.com/mp1947/ya-url-shortener/internal/proto"
 	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
 	"github.com/mp1947/ya-url-shortener/internal/router"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 var (
@@ -88,7 +93,7 @@ func main() {
 	}
 
 	go func() {
-		logger.Info("preparing to start web server")
+		logger.Info("preparing to start http web server")
 		if *cfg.ShouldUseTLS {
 			logger.Info("starting web server with tls config", zap.Any("config", *cfg.TLSConfig))
 			if err := srv.ListenAndServeTLS(cfg.TLSConfig.CrtFilePath, cfg.TLSConfig.KeyFilePath); err != nil && err != http.ErrServerClosed {
@@ -100,6 +105,26 @@ func main() {
 				logger.Fatal("error starting http web server", zap.Error(err))
 			}
 		}
+	}()
+
+	go func() {
+		logger.Info("preparing to start grpc server")
+		l, err := net.Listen("tcp", *cfg.GRPCPort)
+		if err != nil {
+			logger.Fatal("error creating gcrp listener", zap.Error(err))
+		}
+
+		grpcServer := grpc.NewServer()
+
+		proto.RegisterShortenerServer(grpcServer, handlegrpc.NewGRPCService(&service))
+		reflection.Register(grpcServer)
+
+		logger.Info("starting grpc server on port", zap.String("port", *cfg.GRPCPort))
+
+		if err := grpcServer.Serve(l); err != nil {
+			logger.Fatal("error starting grpc server", zap.Error(err))
+		}
+
 	}()
 
 	gracefuShutdownCh := make(chan os.Signal, 1)

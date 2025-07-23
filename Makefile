@@ -30,7 +30,7 @@ run-debug: build up
 	@GIN_MODE=debug ./bin/${SHORTENER_NAME} ${ARGS}
 
 multichecker: build-multichecker
-	go list ./... | grep -v mocks | xargs ./bin/${MULTICHECKER_NAME} -test=false
+	go list ./... | grep -v mocks | grep -v proto | xargs ./bin/${MULTICHECKER_NAME} -test=false
 
 test: mock
 	go test -v ./...
@@ -43,8 +43,12 @@ mock: tidy
 
 coverage:
 	@go test -covermode=count -coverprofile=coverage.out ./...
-	grep -vE "mocks|database|inmemory|cmd" coverage.out > coverage.cleaned.out
+	grep -vE "mocks|database|inmemory|cmd|proto" coverage.out > coverage.cleaned.out
 	go tool cover -func=coverage.cleaned.out
+
+protogen:
+	@protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. \
+		--go-grpc_opt=paths=source_relative internal/proto/shortener.proto
 
 up:
 	docker compose up -d

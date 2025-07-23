@@ -1,6 +1,6 @@
-// Package handler provides HTTP handler functions for routing and processing API requests,
+// Package handlehttp provides HTTP handler functions for routing and processing API requests,
 // delegating business logic to the service layer.
-package handler
+package handlehttp
 
 import (
 	"github.com/mp1947/ya-url-shortener/internal/service"
