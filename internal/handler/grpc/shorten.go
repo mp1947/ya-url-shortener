@@ -3,8 +3,10 @@ package handlegrpc
 import (
 	"context"
 
-	"github.com/google/uuid"
 	pb "github.com/mp1947/ya-url-shortener/internal/proto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 // ShortenURL handles the gRPC request to shorten a given URL.
@@ -15,19 +17,27 @@ func (g *GRPCService) ShortenURL(
 	ctx context.Context,
 	in *pb.ShortenURLReq,
 ) (*pb.ShortenURLResp, error) {
+
+	md, ok := metadata.FromIncomingContext(ctx)
+
+	if !ok {
+		return nil, status.Errorf(codes.Internal, "internal error: metadata not found")
+	}
+
 	var response pb.ShortenURLResp
 
 	shortURL, err := g.Service.ShortenURL(
 		ctx,
 		string(in.Url),
-		uuid.NewString(),
+		md["user_id"][0],
 	)
 
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.AlreadyExists, "error while shortening URL: %v", err)
 	}
 
 	response.ShortURL = shortURL
+	response.JwtToken = md["token"][0]
 
 	return &response, nil
 }

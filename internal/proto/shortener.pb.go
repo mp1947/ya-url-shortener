@@ -68,6 +68,7 @@ func (x *ShortenURLReq) GetUrl() string {
 type ShortenURLResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ShortURL      string                 `protobuf:"bytes,1,opt,name=shortURL,json=short_url,proto3" json:"shortURL,omitempty"`
+	JwtToken      string                 `protobuf:"bytes,2,opt,name=jwtToken,json=jwt_token,proto3" json:"jwtToken,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -105,6 +106,13 @@ func (*ShortenURLResp) Descriptor() ([]byte, []int) {
 func (x *ShortenURLResp) GetShortURL() string {
 	if x != nil {
 		return x.ShortURL
+	}
+	return ""
+}
+
+func (x *ShortenURLResp) GetJwtToken() string {
+	if x != nil {
+		return x.JwtToken
 	}
 	return ""
 }
@@ -156,6 +164,7 @@ func (x *BatchShortenReq) GetBatchShortenData() []*BatchShortenReq_BatchShorten 
 type BatchShortenResp struct {
 	state            protoimpl.MessageState           `protogen:"open.v1"`
 	BatchShortenData []*BatchShortenResp_BatchShorten `protobuf:"bytes,1,rep,name=batchShortenData,json=batch_shorten_data,proto3" json:"batchShortenData,omitempty"`
+	JwtToken         string                           `protobuf:"bytes,2,opt,name=jwtToken,json=jwt_token,proto3" json:"jwtToken,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -195,6 +204,13 @@ func (x *BatchShortenResp) GetBatchShortenData() []*BatchShortenResp_BatchShorte
 		return x.BatchShortenData
 	}
 	return nil
+}
+
+func (x *BatchShortenResp) GetJwtToken() string {
+	if x != nil {
+		return x.JwtToken
+	}
+	return ""
 }
 
 type GetOriginalURLByShortReq struct {
@@ -395,16 +411,18 @@ const file_internal_proto_shortener_proto_rawDesc = "" +
 	"\n" +
 	"\x1einternal/proto/shortener.proto\x12\x05proto\"!\n" +
 	"\rShortenURLReq\x12\x10\n" +
-	"\x03url\x18\x01 \x01(\tR\x03url\"-\n" +
+	"\x03url\x18\x01 \x01(\tR\x03url\"J\n" +
 	"\x0eShortenURLResp\x12\x1b\n" +
-	"\bshortURL\x18\x01 \x01(\tR\tshort_url\"\xbe\x01\n" +
+	"\bshortURL\x18\x01 \x01(\tR\tshort_url\x12\x1b\n" +
+	"\bjwtToken\x18\x02 \x01(\tR\tjwt_token\"\xbe\x01\n" +
 	"\x0fBatchShortenReq\x12Q\n" +
 	"\x10batchShortenData\x18\x01 \x03(\v2#.proto.BatchShortenReq.BatchShortenR\x12batch_shorten_data\x1aX\n" +
 	"\fBatchShorten\x12%\n" +
 	"\rcorrelationID\x18\x01 \x01(\tR\x0ecorrelation_id\x12!\n" +
-	"\voriginalURL\x18\x02 \x01(\tR\foriginal_url\"\xba\x01\n" +
+	"\voriginalURL\x18\x02 \x01(\tR\foriginal_url\"\xd7\x01\n" +
 	"\x10BatchShortenResp\x12R\n" +
-	"\x10batchShortenData\x18\x01 \x03(\v2$.proto.BatchShortenResp.BatchShortenR\x12batch_shorten_data\x1aR\n" +
+	"\x10batchShortenData\x18\x01 \x03(\v2$.proto.BatchShortenResp.BatchShortenR\x12batch_shorten_data\x12\x1b\n" +
+	"\bjwtToken\x18\x02 \x01(\tR\tjwt_token\x1aR\n" +
 	"\fBatchShorten\x12%\n" +
 	"\rcorrelationID\x18\x01 \x01(\tR\x0ecorrelation_id\x12\x1b\n" +
 	"\bshortURL\x18\x02 \x01(\tR\tshort_url\"7\n" +

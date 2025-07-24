@@ -10,6 +10,7 @@ message ShortenURLReq {
 
 message ShortenURLResp {
   string shortURL = 1 [json_name = "short_url"];
+  string jwtToken = 2 [json_name = "jwt_token"];
 }
 
 message BatchShortenReq {
@@ -26,6 +27,7 @@ message BatchShortenResp {
     string shortURL = 2 [json_name = "short_url"];
   }
   repeated BatchShorten batchShortenData = 1 [json_name = "batch_shorten_data"];
+  string jwtToken = 2 [json_name = "jwt_token"];
 }
 
 message GetOriginalURLByShortReq {

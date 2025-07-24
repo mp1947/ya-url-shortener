@@ -14,6 +14,7 @@ import (
 
 	"github.com/mp1947/ya-url-shortener/config"
 	handlegrpc "github.com/mp1947/ya-url-shortener/internal/handler/grpc"
+	"github.com/mp1947/ya-url-shortener/internal/interceptor"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/model"
 	"github.com/mp1947/ya-url-shortener/internal/proto"
@@ -92,6 +93,8 @@ func main() {
 		Handler: r.Handler(),
 	}
 
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(interceptor.AuthUnaryInterceptor))
+
 	go func() {
 		logger.Info("preparing to start http web server")
 		if *cfg.ShouldUseTLS {
@@ -114,8 +117,6 @@ func main() {
 			logger.Fatal("error creating gcrp listener", zap.Error(err))
 		}
 
-		grpcServer := grpc.NewServer()
-
 		proto.RegisterShortenerServer(grpcServer, handlegrpc.NewGRPCService(&service))
 		reflection.Register(grpcServer)
 
@@ -133,14 +134,17 @@ func main() {
 
 	<-gracefuShutdownCh
 
-	logger.Info("received shutdown signal, gracefully shutting down web server")
+	logger.Info("received shutdown signal, gracefully shutting down http server")
 
 	shutdownCtx, shutdownCtxCancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer shutdownCtxCancel()
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		logger.Error("graceful shutdown error", zap.Error(err))
+		logger.Error("http server graceful shutdown error", zap.Error(err))
 	}
+
+	grpcServer.GracefulStop()
+	logger.Info("grpc server has been stopped")
 
 	<-shutdownCtx.Done()
 
