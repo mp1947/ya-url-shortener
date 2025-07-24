@@ -58,7 +58,7 @@ func main() {
 	logger.Info(
 		"initializing web application with config",
 		zap.String("host", *cfg.HTTPServerAddress),
-		zap.String("base_url", *cfg.BaseURL),
+		zap.String("base_url", *cfg.BaseHTTPURL),
 	)
 
 	storage, err := repository.CreateRepository(logger, *cfg, ctx)

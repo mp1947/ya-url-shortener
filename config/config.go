@@ -15,7 +15,8 @@ const (
 	tlsSettingsUndefinedErr   = "cert file path or config file path were not defined in values.yaml config file"
 	defaultServerAddress      = ":8080"
 	defaultGRPCPort           = ":9090"
-	defaultBaseURL            = "http://localhost:8080"
+	defaultBaseHTTPURL        = "http://localhost:8080"
+	defaultBaseGRPCURL        = "localhost:9090"
 	defaultFileStoragePath    = "./output.out"
 	defaultCrtFilePath        = "./keys/cert.crt"
 	defaultKeyFilePath        = "./keys/key.pem"
@@ -27,7 +28,8 @@ const (
 type Config struct {
 	HTTPServerAddress *string `mapstructure:"SERVER_ADDRESS"`
 	GRPCServerAddress *string `mapstructure:"GRPC_PORT"`
-	BaseURL           *string `mapstructure:"BASE_URL"`
+	BaseHTTPURL       *string `mapstructure:"BASE_URL"`
+	BaseGRPCURL       *string `mapstructure:"BASE_GRPC_URL"`
 	FileStoragePath   *string `mapstructure:"FILE_STORAGE_PATH"`
 	DatabaseDSN       *string `mapstructure:"DATABASE_DSN"`
 	TrustedSubnetRaw  *string `mapstructure:"TRUSTED_SUBNET"`
@@ -55,7 +57,7 @@ func InitConfig() *Config {
 	cfg := &Config{}
 
 	cfg.HTTPServerAddress = new(string)
-	cfg.BaseURL = new(string)
+	cfg.BaseHTTPURL = new(string)
 	cfg.FileStoragePath = new(string)
 	cfg.DatabaseDSN = new(string)
 	cfg.ConfigFilePath = new(string)
@@ -63,6 +65,7 @@ func InitConfig() *Config {
 	cfg.TrustedSubnetRaw = new(string)
 	cfg.TrustedSubnet = new(net.IPNet)
 	cfg.GRPCServerAddress = new(string)
+	cfg.BaseGRPCURL = new(string)
 
 	flagServerAddress := flag.String("a", "", "listen address, example: -a :8080, default :8080")
 	flagBaseURL := flag.String("b", "", "base url, example: -b http://localhost:8080, default: http://localhost:8080")
@@ -72,16 +75,18 @@ func InitConfig() *Config {
 	flagShouldUseTLS := flag.Bool("s", false, "if provided, enables https, example: -s")
 	flagTrustedSubnet := flag.String("t", "", "trusted subnet: 192.168.1.1./24")
 	flagGRPCServerAddress := flag.String("g", "", "grpc port: :9090")
+	flagBaseGRPCURL := flag.String("bg", "", "base grpc url, example: -bg localhost:9090")
 	flag.Parse()
 
 	v := viper.New()
 	v.SetConfigType("json")
 	v.SetDefault("SERVER_ADDRESS", defaultServerAddress)
-	v.SetDefault("BASE_URL", defaultBaseURL)
+	v.SetDefault("BASE_URL", defaultBaseHTTPURL)
 	v.SetDefault("FILE_STORAGE_PATH", defaultFileStoragePath)
 	v.SetDefault("ENABLE_HTTPS", false)
 	v.SetDefault("TRUSTED_SUBNET", "")
 	v.SetDefault("GRPC_PORT", defaultGRPCPort)
+	v.SetDefault("BASE_GRPC_URL", defaultBaseGRPCURL)
 
 	if *flagConfigFile != "" {
 		v.SetConfigFile(*flagConfigFile)
@@ -100,7 +105,7 @@ func InitConfig() *Config {
 		cfg.HTTPServerAddress = flagServerAddress
 	}
 	if *flagBaseURL != "" {
-		cfg.BaseURL = flagBaseURL
+		cfg.BaseHTTPURL = flagBaseURL
 	}
 	if *flagFileStoragePath != "" {
 		cfg.FileStoragePath = flagFileStoragePath
@@ -114,6 +119,9 @@ func InitConfig() *Config {
 
 	if *flagGRPCServerAddress != "" {
 		cfg.GRPCServerAddress = flagGRPCServerAddress
+	}
+	if *flagBaseGRPCURL != "" {
+		cfg.BaseGRPCURL = flagBaseGRPCURL
 	}
 
 	if *cfg.TrustedSubnetRaw != "" {

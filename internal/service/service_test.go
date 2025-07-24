@@ -14,7 +14,7 @@ var baseURL = "http://localhost:8080"
 var fileStoragePath = "./test.out"
 var cfg = config.Config{
 	HTTPServerAddress: &listenAddr,
-	BaseURL:           &baseURL,
+	BaseHTTPURL:       &baseURL,
 	FileStoragePath:   &fileStoragePath,
 }
 var l, _ = logger.InitLogger()

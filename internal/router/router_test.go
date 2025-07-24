@@ -20,7 +20,7 @@ func TestCreateRouter(t *testing.T) {
 		fileStoragePath := "./test.out"
 		cfg := config.Config{
 			HTTPServerAddress: &listenAddr,
-			BaseURL:           &baseURL,
+			BaseHTTPURL:       &baseURL,
 			FileStoragePath:   &fileStoragePath,
 		}
 		storage := &inmemory.Memory{}

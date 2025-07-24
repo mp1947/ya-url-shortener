@@ -34,16 +34,17 @@ func AuthUnaryInterceptor(
 	}
 
 	tokenFromMD := md.Get("authorization")
+	var newToken string
+	var user uuid.UUID
+	var isExists bool
 
 	if len(tokenFromMD) == 0 {
-		return nil, status.Errorf(codes.Unauthenticated, "authorization token is not provided")
+		isExists = false
+	} else {
+		ok, user = auth.Validate(tokenFromMD[0])
 	}
 
-	ok, user := auth.Validate(tokenFromMD[0])
-
-	var newToken string
-
-	if !ok {
+	if !ok || !isExists {
 		generatedUserID := uuid.New()
 
 		var err error

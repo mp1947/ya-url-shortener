@@ -45,7 +45,7 @@ func (s *ShortenService) ShortenURLBatch(
 		}
 		result[i] = dto.BatchShortenResponse{
 			CorrelationID: v.CorrelationID,
-			ShortURL:      fmt.Sprintf("%s/%s", *s.Cfg.BaseURL, shortURLID),
+			ShortURL:      fmt.Sprintf("%s/%s", *s.Cfg.BaseHTTPURL, shortURLID),
 		}
 	}
 
