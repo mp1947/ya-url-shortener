@@ -2,6 +2,7 @@ package handlegrpc
 
 import (
 	"context"
+	"strings"
 
 	pb "github.com/mp1947/ya-url-shortener/internal/proto"
 	"google.golang.org/grpc/codes"
@@ -36,7 +37,7 @@ func (g *GRPCService) GetUserURLS(
 
 	for _, url := range urls {
 		response.UserURLs = append(response.UserURLs, &pb.GetUserURLSResp_UserURL{
-			ShortURL:    url.ShortURL,
+			ShortURL:    strings.Replace(url.ShortURL, *g.Cfg.BaseHTTPURL, *g.Cfg.BaseGRPCURL, 1),
 			OriginalURL: url.OriginalURL,
 		})
 	}

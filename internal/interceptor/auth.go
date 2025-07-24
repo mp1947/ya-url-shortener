@@ -42,22 +42,24 @@ func AuthUnaryInterceptor(
 		isExists = false
 	} else {
 		ok, user = auth.Validate(tokenFromMD[0])
+		isExists = ok
 	}
 
-	if !ok || !isExists {
-		generatedUserID := uuid.New()
-
+	if !isExists {
+		// Token is missing or invalid, generate new user and token
+		user = uuid.New()
 		var err error
-		newToken, err = auth.CreateToken(generatedUserID)
-
+		newToken, err = auth.CreateToken(user)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error creating new token: %v", err)
 		}
-		md.Append("user_id", generatedUserID.String())
+		md.Set("user_id", user.String())
+		md.Set("token", newToken)
+	} else {
+		// Token is valid, preserve existing user and token
+		md.Set("user_id", user.String())
+		md.Set("token", tokenFromMD[0])
 	}
-
-	md.Append("user_id", user.String())
-	md.Append("token", newToken)
 
 	ctx = metadata.NewIncomingContext(ctx, md)
 
