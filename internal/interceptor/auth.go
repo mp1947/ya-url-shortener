@@ -15,11 +15,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// AuthUnaryInterceptor is a gRPC unary server interceptor that performs authentication
-// by validating the "authorization" token present in the incoming request metadata.
-// If the metadata or token is missing, or if the token is invalid, it returns an appropriate
-// gRPC error. On successful validation, it injects the user ID into the context and calls
-// the next handler in the chain.
+// AuthUnaryInterceptor is a gRPC unary server interceptor that handles authentication via metadata tokens.
+// It checks for the presence of an "authorization" token in the incoming context metadata. If the token is valid,
+// it extracts the associated user information and appends it to the metadata. If the token is missing or invalid,
+// it generates a new user ID and token, appends them to the metadata, and updates the context accordingly.
+// The interceptor then calls the handler with the updated context. Returns an error if metadata is missing or
+// token creation fails.
 func AuthUnaryInterceptor(
 	ctx context.Context,
 	req any,
