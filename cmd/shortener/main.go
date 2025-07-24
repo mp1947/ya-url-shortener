@@ -117,7 +117,7 @@ func main() {
 			logger.Fatal("error creating gcrp listener", zap.Error(err))
 		}
 
-		proto.RegisterShortenerServer(grpcServer, handlegrpc.NewGRPCService(&service))
+		proto.RegisterShortenerServer(grpcServer, handlegrpc.NewGRPCService(&service, cfg))
 		reflection.Register(grpcServer)
 
 		logger.Info("starting grpc server on address", zap.String("address", *cfg.GRPCServerAddress))

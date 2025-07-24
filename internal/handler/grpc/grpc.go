@@ -3,6 +3,7 @@
 package handlegrpc
 
 import (
+	"github.com/mp1947/ya-url-shortener/config"
 	pb "github.com/mp1947/ya-url-shortener/internal/proto"
 	"github.com/mp1947/ya-url-shortener/internal/service"
 )
@@ -13,10 +14,11 @@ import (
 type GRPCService struct {
 	pb.UnimplementedShortenerServer
 	Service service.Service
+	Cfg     *config.Config
 }
 
 // NewGRPCService creates and returns a new GRPCService instance using the provided service.
 // It initializes the GRPCService with the given service implementation.
-func NewGRPCService(s service.Service) *GRPCService {
-	return &GRPCService{Service: s}
+func NewGRPCService(s service.Service, cfg *config.Config) *GRPCService {
+	return &GRPCService{Service: s, Cfg: cfg}
 }

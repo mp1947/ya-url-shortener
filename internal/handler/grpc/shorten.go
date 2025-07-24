@@ -2,6 +2,7 @@ package handlegrpc
 
 import (
 	"context"
+	"strings"
 
 	pb "github.com/mp1947/ya-url-shortener/internal/proto"
 	"google.golang.org/grpc/codes"
@@ -36,7 +37,7 @@ func (g *GRPCService) ShortenURL(
 		return nil, status.Errorf(codes.AlreadyExists, "error while shortening URL: %v", err)
 	}
 
-	response.ShortURL = shortURL
+	response.ShortURL = strings.Replace(shortURL, *g.Cfg.BaseHTTPURL, *g.Cfg.BaseGRPCURL, 1)
 	response.JwtToken = md["token"][0]
 
 	return &response, nil
