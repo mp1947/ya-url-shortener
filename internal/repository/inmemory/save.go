@@ -62,7 +62,7 @@ func (s *Memory) SaveBatch(
 	userID string,
 ) (bool, error) {
 	for _, v := range urls {
-		// s.data[v.ShortURLID] = v.OriginalURL
+
 		err := s.Save(ctx, v.ShortURLID, v.OriginalURL, userID)
 		if err != nil {
 			return false, err

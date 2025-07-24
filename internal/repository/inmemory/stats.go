@@ -11,5 +11,8 @@ import (
 // or an error if the operation fails.
 // The context parameter allows for request cancellation and timeout control.
 func (s *Memory) GetInternalStats(ctx context.Context) (*dto.InternalStatsResp, error) {
-	return nil, nil
+	return &dto.InternalStatsResp{
+		URLs:  s.EP.CurrentUUID,
+		Users: s.EP.CurrentUUID,
+	}, nil
 }
