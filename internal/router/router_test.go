@@ -19,9 +19,9 @@ func TestCreateRouter(t *testing.T) {
 		baseURL := "http://localhost:8080"
 		fileStoragePath := "./test.out"
 		cfg := config.Config{
-			ServerAddress:   &listenAddr,
-			BaseURL:         &baseURL,
-			FileStoragePath: &fileStoragePath,
+			HTTPServerAddress: &listenAddr,
+			BaseURL:           &baseURL,
+			FileStoragePath:   &fileStoragePath,
 		}
 		storage := &inmemory.Memory{}
 		l, err := logger.InitLogger()

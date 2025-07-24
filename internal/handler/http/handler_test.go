@@ -26,9 +26,9 @@ var listenAddr = ":8080"
 var baseURL = "http://localhost:8080"
 var fileStoragePath = "./test.out"
 var cfg = config.Config{
-	ServerAddress:   &listenAddr,
-	BaseURL:         &baseURL,
-	FileStoragePath: &fileStoragePath,
+	HTTPServerAddress: &listenAddr,
+	BaseURL:           &baseURL,
+	FileStoragePath:   &fileStoragePath,
 }
 var storage = &inmemory.Memory{}
 var l, _ = logger.InitLogger()

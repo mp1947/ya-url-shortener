@@ -14,7 +14,7 @@ func TestInitConfig(t *testing.T) {
 		assert.NotNil(t, cfg.BaseURL)
 		assert.NotNil(t, cfg.DatabaseDSN)
 		assert.NotNil(t, cfg.FileStoragePath)
-		assert.NotNil(t, cfg.ServerAddress)
+		assert.NotNil(t, cfg.HTTPServerAddress)
 	})
 
 }

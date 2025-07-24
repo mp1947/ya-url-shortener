@@ -25,16 +25,16 @@ const (
 // the server listen address, base URL, file storage path, and database DSN.
 // All fields are pointers to strings, allowing for optional configuration values.
 type Config struct {
-	ServerAddress    *string `mapstructure:"SERVER_ADDRESS"`
-	BaseURL          *string `mapstructure:"BASE_URL"`
-	FileStoragePath  *string `mapstructure:"FILE_STORAGE_PATH"`
-	DatabaseDSN      *string `mapstructure:"DATABASE_DSN"`
-	TrustedSubnetRaw *string `mapstructure:"TRUSTED_SUBNET"`
-	GRPCPort         *string `mapstructure:"GRPC_PORT"`
-	TrustedSubnet    *net.IPNet
-	ConfigFilePath   *string
-	ShouldUseTLS     *bool `mapstructure:"ENABLE_HTTPS"`
-	TLSConfig        *TLS
+	HTTPServerAddress *string `mapstructure:"SERVER_ADDRESS"`
+	GRPCServerAddress *string `mapstructure:"GRPC_PORT"`
+	BaseURL           *string `mapstructure:"BASE_URL"`
+	FileStoragePath   *string `mapstructure:"FILE_STORAGE_PATH"`
+	DatabaseDSN       *string `mapstructure:"DATABASE_DSN"`
+	TrustedSubnetRaw  *string `mapstructure:"TRUSTED_SUBNET"`
+	TrustedSubnet     *net.IPNet
+	ConfigFilePath    *string
+	ShouldUseTLS      *bool `mapstructure:"ENABLE_HTTPS"`
+	TLSConfig         *TLS
 }
 
 // TLS holds the tls configuration consists of crt and key files path
@@ -54,7 +54,7 @@ type TLS struct {
 func InitConfig() *Config {
 	cfg := &Config{}
 
-	cfg.ServerAddress = new(string)
+	cfg.HTTPServerAddress = new(string)
 	cfg.BaseURL = new(string)
 	cfg.FileStoragePath = new(string)
 	cfg.DatabaseDSN = new(string)
@@ -62,7 +62,7 @@ func InitConfig() *Config {
 	cfg.ShouldUseTLS = new(bool)
 	cfg.TrustedSubnetRaw = new(string)
 	cfg.TrustedSubnet = new(net.IPNet)
-	cfg.GRPCPort = new(string)
+	cfg.GRPCServerAddress = new(string)
 
 	flagServerAddress := flag.String("a", "", "listen address, example: -a :8080, default :8080")
 	flagBaseURL := flag.String("b", "", "base url, example: -b http://localhost:8080, default: http://localhost:8080")
@@ -71,7 +71,7 @@ func InitConfig() *Config {
 	flagDatabaseDSN := flag.String("d", "", "database dsn, example: -d postgres://app:pass@localhost:5432/app?pool_max_conns=10&pool_max_conn_lifetime=1h30m")
 	flagShouldUseTLS := flag.Bool("s", false, "if provided, enables https, example: -s")
 	flagTrustedSubnet := flag.String("t", "", "trusted subnet: 192.168.1.1./24")
-	flagGRPCPort := flag.String("g", "", "grpc port: :9090")
+	flagGRPCServerAddress := flag.String("g", "", "grpc port: :9090")
 	flag.Parse()
 
 	v := viper.New()
@@ -97,7 +97,7 @@ func InitConfig() *Config {
 	}
 
 	if *flagServerAddress != "" {
-		cfg.ServerAddress = flagServerAddress
+		cfg.HTTPServerAddress = flagServerAddress
 	}
 	if *flagBaseURL != "" {
 		cfg.BaseURL = flagBaseURL
@@ -112,8 +112,8 @@ func InitConfig() *Config {
 		cfg.ShouldUseTLS = flagShouldUseTLS
 	}
 
-	if *flagGRPCPort != "" {
-		cfg.GRPCPort = flagGRPCPort
+	if *flagGRPCServerAddress != "" {
+		cfg.GRPCServerAddress = flagGRPCServerAddress
 	}
 
 	if *cfg.TrustedSubnetRaw != "" {

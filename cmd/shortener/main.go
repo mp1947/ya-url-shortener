@@ -56,7 +56,7 @@ func main() {
 
 	logger.Info(
 		"initializing web application with config",
-		zap.String("host", *cfg.ServerAddress),
+		zap.String("host", *cfg.HTTPServerAddress),
 		zap.String("base_url", *cfg.BaseURL),
 	)
 
@@ -88,7 +88,7 @@ func main() {
 	)
 
 	srv := &http.Server{
-		Addr:    *cfg.ServerAddress,
+		Addr:    *cfg.HTTPServerAddress,
 		Handler: r.Handler(),
 	}
 
@@ -109,7 +109,7 @@ func main() {
 
 	go func() {
 		logger.Info("preparing to start grpc server")
-		l, err := net.Listen("tcp", *cfg.GRPCPort)
+		l, err := net.Listen("tcp", *cfg.GRPCServerAddress)
 		if err != nil {
 			logger.Fatal("error creating gcrp listener", zap.Error(err))
 		}
@@ -119,7 +119,7 @@ func main() {
 		proto.RegisterShortenerServer(grpcServer, handlegrpc.NewGRPCService(&service))
 		reflection.Register(grpcServer)
 
-		logger.Info("starting grpc server on port", zap.String("port", *cfg.GRPCPort))
+		logger.Info("starting grpc server on address", zap.String("address", *cfg.GRPCServerAddress))
 
 		if err := grpcServer.Serve(l); err != nil {
 			logger.Fatal("error starting grpc server", zap.Error(err))
