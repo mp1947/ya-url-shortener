@@ -18,6 +18,10 @@ func (g *GRPCService) ShortenURL(
 	in *pb.ShortenURLReq,
 ) (*pb.ShortenURLResp, error) {
 
+	if in.Url == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid URL provided")
+	}
+
 	userID, token, err := g.getDataFromMD(ctx)
 
 	if err != nil {

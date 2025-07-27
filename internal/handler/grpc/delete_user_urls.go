@@ -25,6 +25,10 @@ func (g *GRPCService) DeleteUserURLS(
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	if len(in.ShortURLs) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "no short URLs provided")
+	}
+
 	var result pb.DeleteURLSResp
 
 	g.Service.DeleteURLsBatch(

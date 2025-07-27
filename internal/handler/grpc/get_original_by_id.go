@@ -25,7 +25,12 @@ func (g *GRPCService) GetOriginalURLByShort(
 	in *pb.GetOriginalURLByShortReq,
 ) (*pb.GetOriginalURLByShortResp, error) {
 
+	if in.ShortURL == "" {
+		return nil, errors.New("short URL cannot be empty")
+	}
+
 	var response pb.GetOriginalURLByShortResp
+
 	parsedURL := strings.Split(in.ShortURL, "/")
 
 	var id string
