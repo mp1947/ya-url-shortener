@@ -3,9 +3,13 @@
 package handlegrpc
 
 import (
+	"context"
+	"errors"
+
 	"github.com/mp1947/ya-url-shortener/config"
 	pb "github.com/mp1947/ya-url-shortener/internal/proto"
 	"github.com/mp1947/ya-url-shortener/internal/service"
+	"google.golang.org/grpc/metadata"
 )
 
 // GRPCService implements the gRPC server for the URL shortener service.
@@ -21,4 +25,17 @@ type GRPCService struct {
 // It initializes the GRPCService with the given service implementation.
 func NewGRPCService(s service.Service, cfg *config.Config) *GRPCService {
 	return &GRPCService{Service: s, Cfg: cfg}
+}
+
+// getDataFromMD extracts the "user_id" and "token" values from the gRPC metadata in the provided context.
+// It returns the user ID, token, and an error if the metadata is not found or the required keys are missing.
+func (g *GRPCService) getDataFromMD(ctx context.Context) (userID string, token string, err error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		err = errors.New("metadata not found")
+		return "", "", err
+	}
+	userID = md["user_id"][0]
+	token = md["token"][0]
+	return userID, token, nil
 }

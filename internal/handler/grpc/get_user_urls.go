@@ -6,7 +6,6 @@ import (
 
 	pb "github.com/mp1947/ya-url-shortener/internal/proto"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -19,12 +18,11 @@ func (g *GRPCService) GetUserURLS(
 	in *pb.Empty,
 ) (*pb.GetUserURLSResp, error) {
 
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, status.Errorf(codes.Internal, "internal error: metadata not found")
-	}
+	userID, _, err := g.getDataFromMD(ctx)
 
-	userID := md["user_id"][0]
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	urls, err := g.Service.GetUserURLs(ctx, userID)
 	if err != nil {

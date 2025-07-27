@@ -6,7 +6,6 @@ import (
 	"github.com/mp1947/ya-url-shortener/internal/dto"
 	pb "github.com/mp1947/ya-url-shortener/internal/proto"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -31,9 +30,10 @@ func (g *GRPCService) BatchShortenURL(
 		return nil, status.Errorf(codes.InvalidArgument, "no URLs provided to shorten")
 	}
 
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, status.Errorf(codes.Internal, "internal error: metadata not found")
+	userID, token, err := g.getDataFromMD(ctx)
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	batchData := make([]dto.BatchShortenRequest, 0, len(in.BatchShortenData))
@@ -44,7 +44,7 @@ func (g *GRPCService) BatchShortenURL(
 		})
 	}
 
-	dataShortened, err := g.Service.ShortenURLBatch(ctx, batchData, md["user_id"][0])
+	dataShortened, err := g.Service.ShortenURLBatch(ctx, batchData, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -59,6 +59,6 @@ func (g *GRPCService) BatchShortenURL(
 
 	return &pb.BatchShortenResp{
 		BatchShortenData: response,
-		JwtToken:         md["token"][0],
+		JwtToken:         token,
 	}, nil
 }

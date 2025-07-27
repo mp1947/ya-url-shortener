@@ -6,7 +6,6 @@ import (
 
 	pb "github.com/mp1947/ya-url-shortener/internal/proto"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -19,10 +18,10 @@ func (g *GRPCService) ShortenURL(
 	in *pb.ShortenURLReq,
 ) (*pb.ShortenURLResp, error) {
 
-	md, ok := metadata.FromIncomingContext(ctx)
+	userID, token, err := g.getDataFromMD(ctx)
 
-	if !ok {
-		return nil, status.Errorf(codes.Internal, "internal error: metadata not found")
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	var response pb.ShortenURLResp
@@ -30,7 +29,7 @@ func (g *GRPCService) ShortenURL(
 	shortURL, err := g.Service.ShortenURL(
 		ctx,
 		string(in.Url),
-		md["user_id"][0],
+		userID,
 	)
 
 	if err != nil {
@@ -38,7 +37,7 @@ func (g *GRPCService) ShortenURL(
 	}
 
 	response.ShortURL = strings.Replace(shortURL, *g.Cfg.BaseHTTPURL, *g.Cfg.BaseGRPCURL, 1)
-	response.JwtToken = md["token"][0]
+	response.JwtToken = token
 
 	return &response, nil
 }
