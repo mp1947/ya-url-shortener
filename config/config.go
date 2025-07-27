@@ -30,6 +30,7 @@ type Config struct {
 	GRPCServerAddress *string `mapstructure:"GRPC_PORT"`
 	BaseHTTPURL       *string `mapstructure:"BASE_URL"`
 	BaseGRPCURL       *string `mapstructure:"BASE_GRPC_URL"`
+	GRPCEnabled       *bool   `mapstructure:"ENABLE_GRPC"`
 	FileStoragePath   *string `mapstructure:"FILE_STORAGE_PATH"`
 	DatabaseDSN       *string `mapstructure:"DATABASE_DSN"`
 	TrustedSubnetRaw  *string `mapstructure:"TRUSTED_SUBNET"`
@@ -66,6 +67,7 @@ func InitConfig() *Config {
 	cfg.TrustedSubnet = new(net.IPNet)
 	cfg.GRPCServerAddress = new(string)
 	cfg.BaseGRPCURL = new(string)
+	cfg.GRPCEnabled = new(bool)
 
 	flagServerAddress := flag.String("a", "", "listen address, example: -a :8080, default :8080")
 	flagBaseURL := flag.String("b", "", "base url, example: -b http://localhost:8080, default: http://localhost:8080")
@@ -74,7 +76,8 @@ func InitConfig() *Config {
 	flagDatabaseDSN := flag.String("d", "", "database dsn, example: -d postgres://app:pass@localhost:5432/app?pool_max_conns=10&pool_max_conn_lifetime=1h30m")
 	flagShouldUseTLS := flag.Bool("s", false, "if provided, enables https, example: -s")
 	flagTrustedSubnet := flag.String("t", "", "trusted subnet: 192.168.1.1./24")
-	flagGRPCServerAddress := flag.String("g", "", "grpc port: :9090")
+	flagGRPCEnabled := flag.Bool("g", false, "if provided, enables grpc server, example: -g")
+	flagGRPCServerAddress := flag.String("gp", "", "grpc port: :9090")
 	flagBaseGRPCURL := flag.String("bg", "", "base grpc url, example: -bg localhost:9090")
 	flag.Parse()
 
@@ -84,6 +87,7 @@ func InitConfig() *Config {
 	v.SetDefault("BASE_URL", defaultBaseHTTPURL)
 	v.SetDefault("FILE_STORAGE_PATH", defaultFileStoragePath)
 	v.SetDefault("ENABLE_HTTPS", false)
+	v.SetDefault("ENABLE_GRPC", false)
 	v.SetDefault("TRUSTED_SUBNET", "")
 	v.SetDefault("GRPC_PORT", defaultGRPCPort)
 	v.SetDefault("BASE_GRPC_URL", defaultBaseGRPCURL)
@@ -122,6 +126,10 @@ func InitConfig() *Config {
 	}
 	if *flagBaseGRPCURL != "" {
 		cfg.BaseGRPCURL = flagBaseGRPCURL
+	}
+
+	if *flagGRPCEnabled {
+		cfg.GRPCEnabled = flagGRPCEnabled
 	}
 
 	if *cfg.TrustedSubnetRaw != "" {
