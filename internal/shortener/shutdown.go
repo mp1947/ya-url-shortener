@@ -32,8 +32,19 @@ func (s *Shortener) Shutdown(ctx context.Context) error {
 	}
 
 	if s.grpcServer != nil {
-		s.Logger.Info("gracefully shutting down gRPC server")
-		s.grpcServer.GracefulStop()
+		s.Logger.Info("gracefully shutting down gRPC server with timeout")
+		stopped := make(chan struct{})
+		go func() {
+			s.grpcServer.GracefulStop()
+			close(stopped)
+		}()
+		select {
+		case <-ctx.Done():
+			s.Logger.Warn("timeout reached, forcing gRPC server stop")
+			s.grpcServer.Stop()
+			return ctx.Err()
+		case <-stopped:
+		}
 	}
 
 	if s.repo.GetType() == "database" {
