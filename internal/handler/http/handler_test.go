@@ -1,4 +1,4 @@
-package handler_test
+package handlehttp_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/handler"
+	handler "github.com/mp1947/ya-url-shortener/internal/handler/http"
 	"github.com/mp1947/ya-url-shortener/internal/logger"
 	"github.com/mp1947/ya-url-shortener/internal/model"
 	"github.com/mp1947/ya-url-shortener/internal/repository/inmemory"
@@ -26,9 +26,9 @@ var listenAddr = ":8080"
 var baseURL = "http://localhost:8080"
 var fileStoragePath = "./test.out"
 var cfg = config.Config{
-	ServerAddress:   &listenAddr,
-	BaseURL:         &baseURL,
-	FileStoragePath: &fileStoragePath,
+	HTTPServerAddress: &listenAddr,
+	BaseHTTPURL:       &baseURL,
+	FileStoragePath:   &fileStoragePath,
 }
 var storage = &inmemory.Memory{}
 var l, _ = logger.InitLogger()

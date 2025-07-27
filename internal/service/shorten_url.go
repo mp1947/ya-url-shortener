@@ -46,11 +46,11 @@ func (s *ShortenService) ShortenURL(
 			zap.Error(err),
 			zap.String("original_url", url),
 		)
-		return generateShortURL(*s.Cfg.BaseURL, shortURLID), err
+		return generateShortURL(*s.Cfg.BaseHTTPURL, shortURLID), err
 	} else if err != nil {
 		s.Logger.Warn("unexpected error", zap.Error(err))
 		return "", err
 	}
 
-	return generateShortURL(*s.Cfg.BaseURL, shortURLID), nil
+	return generateShortURL(*s.Cfg.BaseHTTPURL, shortURLID), nil
 }

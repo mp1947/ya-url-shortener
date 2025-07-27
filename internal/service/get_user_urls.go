@@ -39,7 +39,7 @@ func (s *ShortenService) GetUserURLs(
 
 	for i, v := range userURLs {
 		userURLsResponse[i] = dto.ShortenURLsByUserID{
-			ShortURL:    generateShortURL(*s.Cfg.BaseURL, v.ShortURLID),
+			ShortURL:    generateShortURL(*s.Cfg.BaseHTTPURL, v.ShortURLID),
 			OriginalURL: v.OriginalURL,
 		}
 	}

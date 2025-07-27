@@ -5,7 +5,7 @@ import (
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/mp1947/ya-url-shortener/config"
-	"github.com/mp1947/ya-url-shortener/internal/handler"
+	handler "github.com/mp1947/ya-url-shortener/internal/handler/http"
 	im "github.com/mp1947/ya-url-shortener/internal/middleware"
 	"github.com/mp1947/ya-url-shortener/internal/repository"
 	"github.com/mp1947/ya-url-shortener/internal/repository/database"
@@ -49,6 +49,8 @@ func CreateRouter(
 
 	api.GET("/user/urls", h.GetUserURLs)
 	api.DELETE("/user/urls", h.DeleteUserURLs)
+
+	api.GET("/internal/stats", im.WithAuthorizedIP(l, c, h.InternalStats))
 
 	pprof.Register(r, "debug/pprof")
 

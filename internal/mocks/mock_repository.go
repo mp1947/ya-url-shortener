@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	config "github.com/mp1947/ya-url-shortener/config"
+	dto "github.com/mp1947/ya-url-shortener/internal/dto"
 	model "github.com/mp1947/ya-url-shortener/internal/model"
 	gomock "go.uber.org/mock/gomock"
 	zap "go.uber.org/zap"
@@ -71,6 +72,21 @@ func (m *MockRepository) Get(ctx context.Context, shortURL string) (model.URL, e
 func (mr *MockRepositoryMockRecorder) Get(ctx, shortURL any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockRepository)(nil).Get), ctx, shortURL)
+}
+
+// GetInternalStats mocks base method.
+func (m *MockRepository) GetInternalStats(ctx context.Context) (*dto.InternalStatsResp, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetInternalStats", ctx)
+	ret0, _ := ret[0].(*dto.InternalStatsResp)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetInternalStats indicates an expected call of GetInternalStats.
+func (mr *MockRepositoryMockRecorder) GetInternalStats(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInternalStats", reflect.TypeOf((*MockRepository)(nil).GetInternalStats), ctx)
 }
 
 // GetType mocks base method.

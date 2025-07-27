@@ -29,3 +29,10 @@ type ShortenURLsByUserID struct {
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
+
+// InternalStatsResp represents the response structure containing statistics about
+// the number of shortened URLs and registered users in the system.
+type InternalStatsResp struct {
+	URLs  int `json:"urls"`
+	Users int `json:"user"`
+}

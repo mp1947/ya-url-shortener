@@ -5,6 +5,7 @@ package config
 import (
 	"flag"
 	"log"
+	"net"
 
 	"github.com/spf13/viper"
 )
@@ -13,7 +14,9 @@ const (
 	defaultKeysAreNotFoundErr = "error getting defaults from config"
 	tlsSettingsUndefinedErr   = "cert file path or config file path were not defined in values.yaml config file"
 	defaultServerAddress      = ":8080"
-	defaultBaseURL            = "http://localhost:8080"
+	defaultGRPCPort           = ":9090"
+	defaultBaseHTTPURL        = "http://localhost:8080"
+	defaultBaseGRPCURL        = "localhost:9090"
 	defaultFileStoragePath    = "./output.out"
 	defaultCrtFilePath        = "./keys/cert.crt"
 	defaultKeyFilePath        = "./keys/key.pem"
@@ -23,13 +26,18 @@ const (
 // the server listen address, base URL, file storage path, and database DSN.
 // All fields are pointers to strings, allowing for optional configuration values.
 type Config struct {
-	ServerAddress   *string `mapstructure:"SERVER_ADDRESS"`
-	BaseURL         *string `mapstructure:"BASE_URL"`
-	FileStoragePath *string `mapstructure:"FILE_STORAGE_PATH"`
-	DatabaseDSN     *string `mapstructure:"DATABASE_DSN"`
-	ConfigFilePath  *string
-	ShouldUseTLS    *bool `mapstructure:"ENABLE_HTTPS"`
-	TLSConfig       *TLS
+	HTTPServerAddress *string `mapstructure:"SERVER_ADDRESS"`
+	GRPCServerAddress *string `mapstructure:"GRPC_PORT"`
+	BaseHTTPURL       *string `mapstructure:"BASE_URL"`
+	BaseGRPCURL       *string `mapstructure:"BASE_GRPC_URL"`
+	GRPCEnabled       *bool   `mapstructure:"ENABLE_GRPC"`
+	FileStoragePath   *string `mapstructure:"FILE_STORAGE_PATH"`
+	DatabaseDSN       *string `mapstructure:"DATABASE_DSN"`
+	TrustedSubnetRaw  *string `mapstructure:"TRUSTED_SUBNET"`
+	TrustedSubnet     *net.IPNet
+	ConfigFilePath    *string
+	ShouldUseTLS      *bool `mapstructure:"ENABLE_HTTPS"`
+	TLSConfig         *TLS
 }
 
 // TLS holds the tls configuration consists of crt and key files path
@@ -49,12 +57,17 @@ type TLS struct {
 func InitConfig() *Config {
 	cfg := &Config{}
 
-	cfg.ServerAddress = new(string)
-	cfg.BaseURL = new(string)
+	cfg.HTTPServerAddress = new(string)
+	cfg.BaseHTTPURL = new(string)
 	cfg.FileStoragePath = new(string)
 	cfg.DatabaseDSN = new(string)
 	cfg.ConfigFilePath = new(string)
 	cfg.ShouldUseTLS = new(bool)
+	cfg.TrustedSubnetRaw = new(string)
+	cfg.TrustedSubnet = new(net.IPNet)
+	cfg.GRPCServerAddress = new(string)
+	cfg.BaseGRPCURL = new(string)
+	cfg.GRPCEnabled = new(bool)
 
 	flagServerAddress := flag.String("a", "", "listen address, example: -a :8080, default :8080")
 	flagBaseURL := flag.String("b", "", "base url, example: -b http://localhost:8080, default: http://localhost:8080")
@@ -62,14 +75,22 @@ func InitConfig() *Config {
 	flagFileStoragePath := flag.String("f", "", "storage path (inmemory mode), example: -f ./path/to/storage.txt")
 	flagDatabaseDSN := flag.String("d", "", "database dsn, example: -d postgres://app:pass@localhost:5432/app?pool_max_conns=10&pool_max_conn_lifetime=1h30m")
 	flagShouldUseTLS := flag.Bool("s", false, "if provided, enables https, example: -s")
+	flagTrustedSubnet := flag.String("t", "", "trusted subnet: 192.168.1.1./24")
+	flagGRPCEnabled := flag.Bool("g", false, "if provided, enables grpc server, example: -g")
+	flagGRPCServerAddress := flag.String("gp", "", "grpc port: :9090")
+	flagBaseGRPCURL := flag.String("bg", "", "base grpc url, example: -bg localhost:9090")
 	flag.Parse()
 
 	v := viper.New()
 	v.SetConfigType("json")
 	v.SetDefault("SERVER_ADDRESS", defaultServerAddress)
-	v.SetDefault("BASE_URL", defaultBaseURL)
+	v.SetDefault("BASE_URL", defaultBaseHTTPURL)
 	v.SetDefault("FILE_STORAGE_PATH", defaultFileStoragePath)
 	v.SetDefault("ENABLE_HTTPS", false)
+	v.SetDefault("ENABLE_GRPC", false)
+	v.SetDefault("TRUSTED_SUBNET", "")
+	v.SetDefault("GRPC_PORT", defaultGRPCPort)
+	v.SetDefault("BASE_GRPC_URL", defaultBaseGRPCURL)
 
 	if *flagConfigFile != "" {
 		v.SetConfigFile(*flagConfigFile)
@@ -85,10 +106,10 @@ func InitConfig() *Config {
 	}
 
 	if *flagServerAddress != "" {
-		cfg.ServerAddress = flagServerAddress
+		cfg.HTTPServerAddress = flagServerAddress
 	}
 	if *flagBaseURL != "" {
-		cfg.BaseURL = flagBaseURL
+		cfg.BaseHTTPURL = flagBaseURL
 	}
 	if *flagFileStoragePath != "" {
 		cfg.FileStoragePath = flagFileStoragePath
@@ -98,6 +119,34 @@ func InitConfig() *Config {
 	}
 	if *flagShouldUseTLS {
 		cfg.ShouldUseTLS = flagShouldUseTLS
+	}
+
+	if *flagGRPCServerAddress != "" {
+		cfg.GRPCServerAddress = flagGRPCServerAddress
+	}
+	if *flagBaseGRPCURL != "" {
+		cfg.BaseGRPCURL = flagBaseGRPCURL
+	}
+
+	if *flagGRPCEnabled {
+		cfg.GRPCEnabled = flagGRPCEnabled
+	}
+
+	if *cfg.TrustedSubnetRaw != "" {
+		_, ipRange, err := net.ParseCIDR(*cfg.TrustedSubnetRaw)
+		if err != nil {
+			log.Fatalf("not a valid ip range in a TRUSTED_SUBNET variable: %s", *cfg.TrustedSubnetRaw)
+		}
+		cfg.TrustedSubnet = ipRange
+	}
+
+	if *flagTrustedSubnet != "" {
+		_, ipRange, err := net.ParseCIDR(*flagTrustedSubnet)
+
+		if err != nil {
+			log.Fatalf("not a valid ip range: %s", *flagTrustedSubnet)
+		}
+		cfg.TrustedSubnet = ipRange
 	}
 
 	if *cfg.ShouldUseTLS {
